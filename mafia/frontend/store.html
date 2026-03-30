@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Store — MafiaArena</title>
+<meta name="description" content="Buy avatars, skins, themes and power-ups in MafiaArena store." />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+:root{--neon:#1F6FEB;--accent:#FFD369;--header-h:64px;--glass:rgba(255,255,255,0.03)}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#071021,#0d1117 40%);color:#e6eef6}
+/* fixed header (ensure stable height) */
+.topbar{position:fixed;left:0;right:0;top:0;height:var(--header-h);display:flex;align-items:center;z-index:80;backdrop-filter:blur(8px);background:linear-gradient(180deg,rgba(7,18,33,0.6),rgba(7,18,33,0.35));border-bottom:1px solid rgba(255,255,255,0.02)}
+.topbar-inner{max-width:1300px;margin:0 auto;padding:0 18px;width:100%;display:flex;align-items:center;justify-content:space-between;height:var(--header-h)}
+.brand{font-weight:800;background:linear-gradient(90deg,#ffd369,#ff6b6b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn{padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer;border:0}
+.btn-primary{background:linear-gradient(90deg,var(--neon),#00BFA6);color:#07121a}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit}
+
+/* main pushed below header to avoid overlap */
+main{padding-top:calc(var(--header-h) + 20px);max-width:1300px;margin:0 auto;padding-left:18px;padding-right:18px;padding-bottom:48px}
+
+/* header row */
+.store-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.title{font-size:1.6rem;font-weight:800}
+.controls{display:flex;gap:12px;align-items:center}
+
+/* coin counter */
+.coin-box{display:flex;align-items:center;gap:8px;background:var(--glass);padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.02)}
+.diamond-icon{width:28px;height:28px;border-radius:50%;background:linear-gradient(90deg,#6EE7FF,#1F6FEB);display:flex;align-items:center;justify-content:center;font-weight:800;color:#07121a}
+.coin-icon{width:28px;height:28px;border-radius:50%;background:linear-gradient(90deg,#FFD369,#FFB84D);display:flex;align-items:center;justify-content:center;font-weight:800;color:#07121a;animation:spin 2.5s linear infinite}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+
+/* grid */
+.store-grid{display:block;margin-top:8px}
+.main{max-width:980px;margin:0 auto}
+
+/* product cards */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:1100px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.cards{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--glass),rgba(0,0,0,0.04));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);box-shadow:0 12px 40px rgba(0,0,0,0.6);position:relative;perspective:900px;overflow:visible}
+.card-inner{transition:transform .6s ease;transform-style:preserve-3d;min-height:160px;display:flex;flex-direction:column;justify-content:space-between}
+.card.flip .card-inner{transform:rotateY(180deg)}
+.card-front,.card-back{backface-visibility:hidden;border-radius:8px}
+.card-back{position:absolute;inset:0;padding:14px;transform:rotateY(180deg);display:flex;align-items:center;justify-content:center;flex-direction:column}
+.badge-purchased{
+  position:absolute;
+  top:12px;
+  right:12px;               /* moved from left -> right */
+  background:#00bfa6;
+  color:#07121a;
+  padding:6px 8px;
+  border-radius:999px;
+  font-weight:800;
+  display:none;
+  box-shadow:0 8px 24px rgba(0,191,166,0.08);
+}
+/* show when purchased */
+.card.purchased .badge-purchased{ display:block; }
+
+/* buy button */
+.buy{padding:10px 12px;border-radius:10px;background:linear-gradient(90deg,#00d17a,#00bfa6);color:#07121a;font-weight:700;cursor:pointer;transition:transform .12s, box-shadow .12s}
+.buy:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,191,166,0.12)}
+
+/* overlay for not logged in */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:220}
+.overlay .box{background:#0b1220;padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);text-align:center}
+
+/* modal & toast */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:230}
+.modal{background:#0b1220;padding:18px;border-radius:12px;width:100%;max-width:520px;border:1px solid rgba(255,255,255,0.04)}
+.toast{position:fixed;right:18px;bottom:18px;background:#00bfa6;color:#07121a;padding:12px 16px;border-radius:10px;display:none;z-index:240;font-weight:700}
+
+/* background visuals */
+.bg-anim{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.bg-blob{position:absolute;border-radius:50%;filter:blur(120px) saturate(120%);opacity:0.08}
+.particles{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.particle{position:absolute;width:6px;height:6px;border-radius:50%;filter:blur(6px);mix-blend-mode:screen;opacity:.9;animation:float var(--dur) linear infinite}
+@keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-60px)}100%{transform:translateY(0)}}
+.smoke{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.28;filter:blur(1px)}
+.custom-cursor{position:fixed;left:0;top:0;width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,80,80,0.9);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;mix-blend-mode:screen;transition:transform .08s linear}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+  <!-- ...existing code... -->
+  <div class="bg-anim" aria-hidden="true">
+    <div class="bg-blob" style="width:520px;height:520px;left:-80px;top:8%;background:radial-gradient(circle,#1F6FEB,#00BFA6)"></div>
+    <div class="bg-blob" style="width:420px;height:420px;right:-100px;top:30%;background:radial-gradient(circle,#FFD369,#FF8A5B)"></div>
+  </div>
+
+  <div class="particles" id="particles" aria-hidden="true"></div>
+  <canvas id="smoke" class="smoke" width="1600" height="900" aria-hidden="true"></canvas>
+  <div id="cursor" class="custom-cursor" aria-hidden="true"></div>
+
+  <header class="topbar" role="banner">
+    <div class="topbar-inner">
+      <div style="display:flex;align-items:center;gap:18px">
+        <div class="brand">MafiaArena Store</div>
+        <!-- added navigation links -->
+        <nav class="nav" aria-label="Main navigation" style="display:flex;gap:12px;align-items:center">
+          <a href="index.html" class="btn-ghost" style="padding:6px 10px;border-radius:8px;text-decoration:none">Home</a>
+          <a href="play.html" class="btn-ghost" style="padding:6px 10px;border-radius:8px;text-decoration:none">Play</a>
+          <a href="howto.html" class="btn-ghost" style="padding:6px 10px;border-radius:8px;text-decoration:none">How to Play</a>
+        </nav>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="coin-box" aria-hidden="true">
+          <div class="diamond-icon" id="diamondIcon">◆</div>
+          <div id="diamondCount">0</div>
+          <div class="coin-icon" id="coinIcon">¢</div>
+          <div id="coinCount">1,240</div>
+        </div>
+        <button id="topUpBtn" class="btn btn-primary">Top Up</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="store-head">
+      <div class="title">Explore items</div>
+      <div class="controls">
+        <select id="filter" class="select">
+          <option value="all">All categories</option>
+        </select>
+        <select id="sort" class="select">
+          <option value="pop">Sort: Popularity</option>
+          <option value="low">Price: Low→High</option>
+          <option value="high">Price: High→Low</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="store-grid">
+      <section class="main">
+        <div class="tab" style="margin-bottom:12px">
+          <button class="tab-btn active" data-tab="store" style="color: white;">Store</button>
+          <button class="tab-btn" data-tab="owned" style="color: white;">My Items</button>
+        </div>
+
+        <div id="storeView">
+          <div class="cards" id="cards"></div>
+        </div>
+
+        <div id="ownedView" style="display:none">
+          <div class="card"><h4>Owned items</h4><div class="owned" id="ownedList"></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Top Up modal -->
+  <div id="topUpModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal">
+      <h3>Top Up Coins</h3>
+      <div style="margin-top:8px">
+        <label>Amount</label>
+        <input id="topAmount" class="select" type="number" min="100" value="500" />
+      </div>
+      <div style="margin-top:8px">
+        <label>Payment method</label>
+        <select id="payMethod" class="select">
+          <option>PayPal</option><option>Card</option><option>Crypto</option>
+        </select>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+        <button id="cancelTop" class="btn">Cancel</button>
+        <button id="confirmTop" class="btn btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login overlay -->
+  <div id="loginOverlay" class="overlay" aria-hidden="true">
+    <div class="box">
+      <h3>Please log in to access the Store</h3>
+      <p class="muted">You must be signed in to buy items.</p>
+      <div style="margin-top:12px"><a href="login.html" class="btn btn-primary">Login</a></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Purchased!</div>
+
+  <!-- audio -->
+  <audio id="clickSound"><source src="assets/click.mp3" type="audio/mpeg"></audio>
+  <audio id="ambient" loop><source src="assets/ambient.mp3" type="audio/mpeg"></audio>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    if(window.NavAuth && !window.NavAuth.isLogged()){
+      const msg = encodeURIComponent('Please log in to access the Store');
+      window.location.href = 'login.html?msg=' + msg;
+      return;
+    }
+    // if authed, reveal auth elements in header (in case user returned)
+    if(window.NavAuth) window.NavAuth.revealAuthLinks();
+    // load user balance from localStorage if present
+    const user = JSON.parse(localStorage.getItem('mafiaUser') || 'null');
+    if(user){
+      // optionally display user.name or avatar in store header
+      const el = document.getElementById('balance');
+      if(el) el.textContent = el.textContent || '1,000'; // leave existing logic
+    }
+  }catch(e){}
+});
+
+document.addEventListener('DOMContentLoaded', ()=> {
+  // Mock items & state
+  const items = [
+    {id:1,cat:'avatars',title:'Masked Avenger',desc:'Stylish avatar with mask',price:150,icon:'😎'},
+    {id:2,cat:'skins',title:'Red Elegance',desc:'Mafia role skin',price:300,icon:'🕴️'},
+    {id:3,cat:'themes',title:'Neon City',desc:'Background theme',price:200,icon:'🌃'},
+    {id:4,cat:'powerups',title:'Second Chance',desc:'Revive once per game',price:500,icon:'🔁'},
+    {id:5,cat:'sounds',title:'Retro Pack',desc:'Sound effects pack',price:120,icon:'🔊'}
+  ];
+  let owned = [];
+  let balance = 1240;
+  const isLoggedIn = true; // toggle to false to show overlay
+
+  const cardsEl = document.getElementById('cards'), ownedList = document.getElementById('ownedList'), balanceEl = document.getElementById('balance'), coinCount = document.getElementById('coinCount'), toast = document.getElementById('toast');
+  const clickSound = document.getElementById('clickSound'), ambient = document.getElementById('ambient');
+
+  // login overlay
+  const loginOverlay = document.getElementById('loginOverlay');
+  if(!isLoggedIn){ loginOverlay.style.display = 'flex'; loginOverlay.setAttribute('aria-hidden','false'); }
+
+  function renderItems(list){
+    cardsEl.innerHTML = '';
+    list.forEach(it=>{
+      const card = document.createElement('div'); card.className='card'; card.dataset.id = it.id;
+      card.innerHTML = `
+        <div class="badge-purchased">Purchased!</div>
+        <div class="card-inner">
+          <div class="card-front">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="font-size:32px">${it.icon}</div>
+              <div>
+                <div style="font-weight:800">${it.title}</div>
+                <div class="muted small">${it.desc}</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+            <div style="font-weight:800">${it.price} Coins</div>
+            <div><button class="buy">Buy</button></div>
+          </div>
+        </div>
+        <div class="card-back">
+          <div style="font-weight:800">Purchased!</div>
+          <div class="muted small">This item is now in your inventory.</div>
+        </div>
+      `;
+      card.querySelector('.buy').addEventListener('click', ()=> {
+        if(!isLoggedIn){ loginOverlay.style.display='flex'; loginOverlay.setAttribute('aria-hidden','false'); return; }
+        if(balance < it.price){ alert('Not enough coins'); return; }
+        try{ clickSound.currentTime = 0; clickSound.play(); }catch(e){}
+        // deduct and mark purchased
+        balance -= it.price; balanceEl.textContent = balance; coinCount.textContent = balance;
+        card.classList.add('purchased'); // show badge
+        // replace Buy button with Owned (disabled) — no flip animation
+        const btn = card.querySelector('.buy');
+        btn.textContent = 'Owned';
+        btn.disabled = true;
+        btn.style.cursor = 'default';
+        // add to owned
+        owned.push(Object.assign({}, it));
+        showToast('Purchased!');
+        renderOwned();
+      });
+      cardsEl.appendChild(card);
+    });
+  }
+
+  function renderOwned(){
+    ownedList.innerHTML = '';
+    owned.forEach(o=>{
+      const el = document.createElement('div'); el.className='row';
+      el.innerHTML = `<div><strong>${o.title}</strong><div class="muted small">${o.desc}</div></div>
+        <div><button class="btn" data-id="${o.id}" data-action="equip">Equip</button> <button class="btn" data-id="${o.id}" data-action="unequip">Unequip</button></div>`;
+      ownedList.appendChild(el);
+    });
+    ownedList.querySelectorAll('button').forEach(b=> b.addEventListener('click', ()=> showToast(b.dataset.action === 'equip' ? 'Equipped' : 'Unequipped')));
+  }
+
+  function showToast(msg='Done'){ toast.textContent = msg; toast.style.display = 'block'; setTimeout(()=> toast.style.display = 'none', 1800); }
+  renderItems(items); renderOwned();
+  balanceEl.textContent = balance; coinCount.textContent = balance;
+
+  // filter/sort
+  document.getElementById('filter').addEventListener('change', (e)=> {
+    const v = e.target.value; let list = items.slice();
+    if(v !== 'all') list = list.filter(i => i.cat === v);
+    renderItems(list);
+  });
+  document.getElementById('sort').addEventListener('change', (e)=> {
+    const v = e.target.value; let list = items.slice();
+    if(v === 'low') list.sort((a,b)=>a.price-b.price);
+    if(v === 'high') list.sort((a,b)=>b.price-a.price);
+    renderItems(list);
+  });
+
+  // tab switch
+  document.querySelectorAll('.tab-btn').forEach(btn=> btn.addEventListener('click', ()=> {
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+    if(btn.dataset.tab === 'store'){ document.getElementById('storeView').style.display='block'; document.getElementById('ownedView').style.display='none'; }
+    else { document.getElementById('storeView').style.display='none'; document.getElementById('ownedView').style.display='block'; }
+  }));
+
+  // top up modal logic
+  const topUpModal = document.getElementById('topUpModal');
+  document.getElementById('topUpBtn').addEventListener('click', ()=> topUpModal.style.display='flex');
+  document.getElementById('topUpBtn2').addEventListener('click', ()=> topUpModal.style.display='flex');
+  document.getElementById('cancelTop').addEventListener('click', ()=> topUpModal.style.display='none');
+  document.getElementById('confirmTop').addEventListener('click', ()=> {
+    const amt = parseInt(document.getElementById('topAmount').value||0); if(amt<=0){ alert('Enter an amount'); return; }
+    balance += amt; balanceEl.textContent = balance; coinCount.textContent = balance; topUpModal.style.display='none'; showToast('Top up successful');
+  });
+
+  // login overlay behaviour: (clicking login navigates)
+  // ambient sound (optional)
+  try{ ambient.volume = 0.12; /* ambient.play(); */ }catch(e){}
+
+  // visuals: particles, smoke, cursor
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const particlesEl = document.getElementById('particles');
+  if(particlesEl && !prefersReduced){
+    const count = Math.max(10, Math.floor(window.innerWidth/90));
+    for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='particle'; const s=3+Math.random()*8; d.style.width=d.style.height=s+'px'; d.style.left=(Math.random()*100)+'%'; d.style.top=(Math.random()*100)+'%'; d.style.setProperty('--dur',(6+Math.random()*8)+'s'); particlesEl.appendChild(d); }
+  }
+  const canvas = document.getElementById('smoke');
+  if(canvas && !prefersReduced){
+    const ctx = canvas.getContext('2d'); let t=0; (function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(let i=0;i<4;i++){ ctx.beginPath(); const y = canvas.height*0.5 + Math.sin(t*0.4 + i)*12*(i+1); ctx.ellipse(canvas.width*0.5,y,canvas.width*0.45 - i*80,30 + i*8,0,0,Math.PI*2); ctx.fillStyle = `rgba(255,255,255,${0.006 + i*0.007})`; ctx.fill(); } t+=0.01; requestAnimationFrame(loop); })();
+  }
+  const cursor = document.getElementById('cursor'); if(cursor) document.addEventListener('mousemove', e=> cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`);
+
+  // play click sound on buy
+  document.body.addEventListener('click', (e)=> { if(e.target.closest('.buy')){ try{ clickSound.currentTime=0; clickSound.play(); }catch(e){} } });
+});
+</script>
+</body>
+</html>

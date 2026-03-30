@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Friends — MafiaArena</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07121a;--glass:rgba(255,255,255,0.03);--neon:#00BFA6}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#071021,#0d1117);color:#e6eef6}
+.container{max-width:1200px;margin:0 auto;padding:calc(64px + 20px) 18px 80px}
+.topbar{position:fixed;left:0;right:0;top:0;height:64px;display:flex;align-items:center;z-index:80;padding:0 18px;background:linear-gradient(180deg,rgba(7,18,33,0.6),rgba(7,18,33,0.35));border-bottom:1px solid rgba(255,255,255,0.02)}
+.brand{font-weight:800;background:linear-gradient(90deg,#ffd369,#ff6b6b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav{display:flex;gap:12px;align-items:center}
+.btn{padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer;border:0}
+.btn-primary{background:linear-gradient(90deg,var(--neon),#00d17a);color:#07121a}
+.layout{display:grid;grid-template-columns:1fr 320px;gap:18px;margin-top:18px}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}}
+.panel{background:linear-gradient(180deg,var(--glass),rgba(0,0,0,0.04));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 12px 30px rgba(0,0,0,0.6)}
+.header-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.search{flex:1;padding:8px 12px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tab{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.04);background:transparent;cursor:pointer}
+.tab.active{background:linear-gradient(90deg,var(--neon),#00BFA6);color:#07121a}
+.list{display:grid;gap:10px}
+.friend{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.04));border:1px solid rgba(255,255,255,0.02);transition:transform .18s ease}
+.friend:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,0.6)}
+.avatar{width:56px;height:56px;border-radius:12px;background:#0b1220;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}
+.avatar:hover{animation:bounce .6s}
+@keyframes bounce{50%{transform:translateY(-6px)}}
+.info{flex:1}
+.name{font-weight:800}
+.meta{color:rgba(230,238,246,0.65);font-size:13px}
+.status{width:10px;height:10px;border-radius:50%}
+.status.online{background:#00d17a;box-shadow:0 6px 18px rgba(0,211,138,0.06)}
+.status.offline{background:#ff6b6b;box-shadow:0 6px 18px rgba(255,107,107,0.06)}
+.actions{display:flex;gap:8px}
+.small{font-size:13px;color:rgba(230,238,246,0.7)}
+/* modals */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:220}
+.modal{background:var(--bg);padding:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);width:100%;max-width:720px;box-shadow:0 20px 70px rgba(0,0,0,0.7)}
+.modal.small{max-width:420px}
+.modal h3{margin:0 0 8px}
+.input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+.toast{position:fixed;right:18px;bottom:18px;background:#00bfa6;color:#07121a;padding:10px 14px;border-radius:10px;display:none;z-index:240}
+.chat-window{height:320px;background:linear-gradient(180deg,#08121a88,#07121a);padding:12px;border-radius:8px;overflow:auto;border:1px solid rgba(255,255,255,0.02)}
+.msg{max-width:72%;padding:8px 10px;border-radius:12px;margin:6px 0;display:inline-block}
+.msg.sent{margin-left:auto;background:linear-gradient(90deg,#00d17a,#00bfa6);color:#07121a}
+.msg.recv{background:rgba(255,255,255,0.04);color:inherit}
+.typing{height:18px;width:36px;border-radius:6px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center}
+.footer-actions{display:flex;gap:8px;align-items:center;margin-top:8px}
+.small-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+.min-chat{position:fixed;right:18px;bottom:18px;width:52px;height:52px;border-radius:999px;background:linear-gradient(90deg,var(--neon),#00d17a);display:flex;align-items:center;justify-content:center;box-shadow:0 18px 50px rgba(0,0,0,0.6);z-index:260;cursor:pointer}
+
+/* Notifications styles */
+#notifWrap{position:relative;display:inline-flex;align-items:center;margin-left:8px}
+#notifBtn{background:transparent;border:0;cursor:pointer;font-size:18px;position:relative}
+#notifBadge{display:none;position:absolute;top:-6px;right:-6px;background:#ff6b6b;color:#07121a;padding:4px 6px;border-radius:999px;font-weight:800;font-size:12px}
+#notifDropdown{display:none;position:fixed;right:18px;top:74px;width:320px;max-height:420px;overflow:auto;background:#0b1220;border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 60px rgba(0,0,0,0.6);border-radius:10px;padding:8px;z-index:250}
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:12px"><div class="brand">MafiaArena</div></div>
+    <nav class="nav">
+      <a href="index.html" style="margin-left: 20px; color: white;text-decoration: none;">Home</a>
+      <a href="play.html" class="auth-only" style="margin-left: 20px; color: white;text-decoration: none;" >Play</a>
+      <a href="store.html" class="auth-only" style="margin-left: 20px; color: white;text-decoration: none;">Store</a>
+      <a href="friends.html" class="auth-only active" style="margin-left: 20px; color: white;text-decoration: none;">Friends</a>
+      <!-- Notification bell -->
+      <div id="notifWrap" style="position:relative;display:inline-flex;align-items:center;margin-left:8px">
+        <button id="notifBtn" class="btn-ghost" aria-haspopup="true" aria-expanded="false" title="Notifications">🔔<span id="notifBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ff6b6b;color:#07121a;padding:4px 6px;border-radius:999px;font-weight:800;font-size:12px"></span></button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="header-row">
+      <h2>Friends</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="search" class="search" placeholder="Search friends or players..." />
+        <button id="btnAdd" class="btn btn-primary">Add Friend</button>
+        <button id="btnRequests" class="btn btn-ghost">Requests</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <section>
+        <div class="panel">
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="all" style="color: white;">All Friends</button>
+            <button class="tab" data-tab="online" style="color: white;">Online</button>
+            <button class="tab" data-tab="pending" style="color: white;">Pending Requests</button>
+          </div>
+
+          <div class="list panel-body" id="friendsList" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <aside>
+        <div class="panel">
+          <h4>Your Profile</h4>
+          <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
+            <div class="avatar" id="meAvatar">U</div>
+            <div>
+              <div id="meName" class="name">User</div>
+              <div id="meLvl" class="meta small">Lv. 1</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px">
+          <h4>Quick Actions</h4>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+            <button id="btnInvite" class="btn btn-ghost">Invite All Online</button>
+            <button id="btnRefresh" class="btn btn-ghost">Refresh Status</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Add Friend Modal -->
+  <div id="addModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+      <h3 id="addTitle">Add a New Friend</h3>
+      <input id="addInput" class="input" placeholder="Username or Player ID" />
+      <div id="addError" class="error"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button id="cancelAdd" class="btn btn-ghost">Cancel</button>
+        <button id="sendAdd" class="btn btn-primary">Send Request</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Requests Modal -->
+  <div id="reqModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reqTitle">
+      <h3 id="reqTitle">Friend Requests</h3>
+      <div id="reqList" style="display:grid;gap:8px;margin-top:12px"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px"><button id="closeReq" class="btn btn-ghost">Close</button></div>
+    </div>
+  </div>
+
+  <!-- Chat Modal -->
+  <div id="chatModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+      <h3 id="chatTitle">Chat</h3>
+      <div style="display:flex;gap:12px">
+        <div style="width:200px">
+          <div id="chatFriendInfo" style="display:flex;gap:8px;align-items:center">
+            <div class="avatar" id="chatAvatar">F</div>
+            <div>
+              <div id="chatName">Friend</div>
+              <div id="chatStatus" class="small">Online</div>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1">
+          <div class="chat-window" id="chatWindow" aria-live="polite"></div>
+          <div class="footer-actions">
+            <input id="chatInput" class="input" placeholder="Type a message..." />
+            <button id="sendMsg" class="btn btn-primary">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remove Confirm Modal -->
+  <div id="removeModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal small" role="dialog" aria-modal="true">
+      <h3>Remove Friend</h3>
+      <p class="small">Are you sure you want to remove this friend?</p>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+        <button id="cancelRemove" class="btn btn-ghost">Cancel</button>
+        <button id="confirmRemove" class="btn" style="background:#ff6b6b;color:#07121a">Yes, Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add a small notif dropdown element near modals area -->
+  <div id="notifDropdown" style="display:none;position:fixed;right:18px;top:74px;width:320px;max-height:420px;overflow:auto;background:#0b1220;border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 60px rgba(0,0,0,0.6);border-radius:10px;padding:8px;z-index:250" aria-hidden="true"></div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="minChat" class="min-chat" style="display:none">💬</div>
+
+<script>
+// Friends page script (mocked, localStorage)
+document.addEventListener('DOMContentLoaded', ()=> {
+  // auth guard
+  try{
+    if(window.NavAuth && !window.NavAuth.isLogged()){
+      window.NavAuth.requireAuth('Friends');
+      return;
+    } else if(!window.NavAuth){
+      // fallback: check mafiaUser
+      const u = localStorage.getItem('mafiaUser');
+      if(!u){ location.href = 'login.html?msg=' + encodeURIComponent('Please log in to access Friends'); return; }
+    }
+  }catch(e){}
+
+  // Mock initial data (could be loaded from server)
+  const mock = [
+    {id:1,username:'DonVito',country:'US',online:true},
+    {id:2,username:'LadyLuck',country:'RU',online:false},
+    {id:3,username:'SneakySam',country:'UZ',online:true},
+    {id:4,username:'MisterX',country:'GB',online:false}
+  ];
+  // state
+  let friends = JSON.parse(localStorage.getItem('mafia_friends') || 'null') || mock;
+  let requests = JSON.parse(localStorage.getItem('mafia_reqs') || '[]');
+  const listEl = document.getElementById('friendsList');
+  const tabs = document.querySelectorAll('.tab');
+  let currentTab = 'all';
+  const searchInput = document.getElementById('search');
+  const toast = document.getElementById('toast');
+
+  // profile info
+  const me = JSON.parse(localStorage.getItem('mafiaUser') || 'null');
+  if(me){
+    document.getElementById('meAvatar').textContent = me.avatar || me.name.charAt(0);
+    document.getElementById('meName').textContent = me.name + (me.surname ? ' ' + me.surname : '');
+    document.getElementById('meLvl').textContent = 'Lv. ' + (me.level||1);
+  }
+
+  function saveState(){ localStorage.setItem('mafia_friends', JSON.stringify(friends)); localStorage.setItem('mafia_reqs', JSON.stringify(requests)); }
+
+  function renderList(){
+    const q = (searchInput.value || '').toLowerCase();
+    let list = friends.slice();
+    if(currentTab === 'online') list = list.filter(f => f.online);
+    if(currentTab === 'pending') list = []; // pending shown in req modal
+    if(q) list = list.filter(f => f.username.toLowerCase().includes(q));
+    listEl.innerHTML = '';
+    if(!list.length) { listEl.innerHTML = '<div class="small">No friends found</div>'; return; }
+    list.forEach(f=>{
+      const el = document.createElement('div'); el.className = 'friend';
+      el.innerHTML = `
+        <div class="avatar">${f.username.charAt(0)}</div>
+        <div class="info">
+          <div class="name">${f.username}</div>
+          <div class="meta small">${f.country} • ID:${f.id}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="status ${f.online? 'online':'offline'}" title="${f.online? 'Online':'Offline'}" aria-hidden="true"></div>
+          <div class="actions">
+            <button class="btn btn-ghost msg" data-id="${f.id}">Message</button>
+            <button class="btn btn-ghost invite" data-id="${f.id}">Invite</button>
+            <button class="btn" style="background:#ff6b6b;color:#07121a" data-id="${f.id}">Remove</button>
+          </div>
+        </div>
+      `;
+      listEl.appendChild(el);
+    });
+    attachCardHandlers();
+  }
+
+  function attachCardHandlers(){
+    listEl.querySelectorAll('.msg').forEach(b=> b.addEventListener('click', (e)=>{
+      const id = +b.dataset.id; const f = friends.find(x=>x.id===id); openChat(f);
+    }));
+    listEl.querySelectorAll('.invite').forEach(b=> b.addEventListener('click', (e)=>{
+      const id = +b.dataset.id; showToast('Invite sent to player ID ' + id);
+    }));
+    listEl.querySelectorAll('.btn[style]').forEach(b=> b.addEventListener('click', (e)=>{
+      const id = +b.dataset.id; confirmRemove(id);
+    }));
+  }
+
+  // tabs
+  tabs.forEach(t => t.addEventListener('click', ()=> {
+    tabs.forEach(x=>x.classList.remove('active')); t.classList.add('active');
+    currentTab = t.dataset.tab;
+    if(currentTab === 'pending'){ openRequests(); } else { renderList(); }
+  }));
+
+  searchInput.addEventListener('input', renderList);
+
+  // Add Friend modal
+  const addModal = document.getElementById('addModal');
+  const addInput = document.getElementById('addInput');
+  const addError = document.getElementById('addError');
+  document.getElementById('btnAdd').addEventListener('click', ()=> openModal(addModal));
+  document.getElementById('cancelAdd').addEventListener('click', ()=> closeModal(addModal));
+  document.getElementById('sendAdd').addEventListener('click', ()=> {
+    const val = (addInput.value || '').trim();
+    if(!val){ addError.textContent='Enter username or ID'; addError.style.display='block'; shake(addModal); return; }
+    // simulate: if username exists in friends or mock, add to requests/outgoing
+    const exists = friends.some(f=> f.username.toLowerCase() === val.toLowerCase());
+    if(exists){ addError.textContent='User already your friend'; addError.style.display='block'; shake(addModal); return; }
+    // success
+    requests.push({id: Date.now(), username: val, from: me? me.name : 'You' });
+    saveState();
+    closeModal(addModal);
+    showToast('Friend request sent successfully!');
+  });
+
+  // Requests modal
+  const reqModal = document.getElementById('reqModal');
+  const reqList = document.getElementById('reqList');
+  document.getElementById('btnRequests').addEventListener('click', ()=> openModal(reqModal));
+  document.getElementById('closeReq').addEventListener('click', ()=> closeModal(reqModal));
+
+  function openRequests(){
+    openModal(reqModal);
+    renderRequests();
+  }
+  function renderRequests(){
+    reqList.innerHTML = '';
+    if(!requests.length) { reqList.innerHTML = '<div class="small">No requests</div>'; return; }
+    requests.forEach(r=>{
+      const d = document.createElement('div'); d.style.display='flex'; d.style.alignItems='center'; d.style.justifyContent='space-between'; d.style.gap='12px';
+      d.innerHTML = `<div style="display:flex;align-items:center;gap:8px"><div class="avatar">${r.username.charAt(0)}</div><div><div class="name">${r.username}</div><div class="small">From: ${r.from}</div></div></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-primary accept" data-id="${r.id}">Accept</button><button class="btn btn-ghost decline" data-id="${r.id}">Decline</button></div>`;
+      reqList.appendChild(d);
+    });
+    reqList.querySelectorAll('.accept').forEach(b=> b.addEventListener('click', e=>{
+      const id = +b.dataset.id; const idx = requests.findIndex(x=>x.id===id);
+      if(idx>-1){
+        const r = requests.splice(idx,1)[0];
+        friends.push({id: Date.now(), username: r.username, country:'US', online:false});
+        saveState(); renderRequests(); renderList(); showToast('Friend added');
+        // play sound (placeholder)
+        try{ new Audio().play(); }catch(e){}
+      }
+    }));
+    reqList.querySelectorAll('.decline').forEach(b=> b.addEventListener('click', e=>{
+      const id = +b.dataset.id; const idx = requests.findIndex(x=>x.id===id);
+      if(idx>-1){ requests.splice(idx,1); saveState(); renderRequests(); showToast('Request declined'); }
+    }));
+  }
+
+  // Chat modal
+  const chatModal = document.getElementById('chatModal');
+  const chatWindow = document.getElementById('chatWindow');
+  const chatInput = document.getElementById('chatInput');
+  let activeChat = null;
+  function openChat(f){
+    activeChat = f;
+    document.getElementById('chatAvatar').textContent = f.username.charAt(0);
+    document.getElementById('chatName').textContent = f.username;
+    document.getElementById('chatStatus').textContent = f.online ? 'Online' : 'Offline';
+    chatWindow.innerHTML = '';
+    // mock conversation
+    appendMsg('recv','Hey, wanna play?','10:12');
+    appendMsg('sent','Sure, on my way','10:13');
+    openModal(chatModal);
+  }
+  function appendMsg(type, text, time){
+    const m = document.createElement('div'); m.className = 'msg ' + (type==='sent' ? 'sent' : 'recv'); m.textContent = text;
+    const t = document.createElement('div'); t.className='small'; t.textContent = (time || new Date().toLocaleTimeString());
+    const wrap = document.createElement('div'); wrap.appendChild(m); wrap.appendChild(t);
+    chatWindow.appendChild(wrap); chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+  document.getElementById('sendMsg').addEventListener('click', ()=> {
+    const txt = (chatInput.value || '').trim(); if(!txt) return;
+    appendMsg('sent', txt);
+    chatInput.value = '';
+    // mock reply
+    setTimeout(()=> { appendMsg('recv','Nice!'); showToast('Message received'); }, 800);
+  });
+
+  // Remove confirm
+  const removeModal = document.getElementById('removeModal');
+  let removeTarget = null;
+  function confirmRemove(id){
+    removeTarget = id; openModal(removeModal);
+  }
+  document.getElementById('cancelRemove').addEventListener('click', ()=> closeModal(removeModal));
+  document.getElementById('confirmRemove').addEventListener('click', ()=> {
+    if(removeTarget != null){
+      friends = friends.filter(f=> f.id !== removeTarget); saveState(); renderList(); closeModal(removeModal); showToast('Friend removed');
+    }
+  });
+
+  // --- Notifications integration for friends page ---
+  const NKEY = 'mafia_notifications';
+  const notifBtn = document.getElementById('notifBtn');
+  const notifBadge = document.getElementById('notifBadge');
+  const notifDropdown = document.getElementById('notifDropdown');
+
+  function notifRead(){ try{ return JSON.parse(localStorage.getItem(NKEY) || '[]'); }catch(e){ return []; } }
+  function notifWrite(arr){ try{ localStorage.setItem(NKEY, JSON.stringify(arr)); }catch(e){} }
+  function addNotification(obj){
+    const list = notifRead();
+    obj.id = obj.id || Date.now() + Math.floor(Math.random()*999);
+    obj.ts = Date.now();
+    obj.read = false;
+    list.push(obj);
+    notifWrite(list);
+    renderNotifs();
+  }
+  function unseenCount(){ return notifRead().filter(n=>!n.read).length; }
+
+  function renderNotifs(){
+    const items = notifRead();
+    const count = items.filter(n=>!n.read).length;
+    if(count>0){ notifBadge.style.display='inline-flex'; notifBadge.textContent = count; } else { notifBadge.style.display='none'; }
+    notifDropdown.innerHTML = '';
+    if(!items.length){ notifDropdown.innerHTML = '<div class="small" style="padding:12px;color:rgba(230,238,246,0.7)">No notifications</div>'; return; }
+    items.slice().reverse().forEach(n=>{
+      const row = document.createElement('div'); row.style.padding='8px'; row.style.borderBottom='1px solid rgba(255,255,255,0.02)';
+      row.innerHTML = `<div style="font-weight:700">${escapeHtml(n.title||'Notice')}</div><div class="small" style="color:rgba(230,238,246,0.7)">${escapeHtml(n.text)}</div><div class="small" style="color:rgba(230,238,246,0.55);margin-top:6px">${new Date(n.ts).toLocaleString()}</div>`;
+      const controls = document.createElement('div'); controls.style.marginTop='6px'; controls.style.display='flex'; controls.style.gap='6px';
+      const mark = document.createElement('button'); mark.className='btn btn-ghost'; mark.textContent='Mark'; mark.addEventListener('click', ()=> { markRead(n.id); renderNotifs(); });
+      const del = document.createElement('button'); del.className='btn btn-ghost'; del.textContent='Delete'; del.addEventListener('click', ()=> { removeNotif(n.id); renderNotifs(); });
+      controls.appendChild(mark); controls.appendChild(del); row.appendChild(controls);
+      notifDropdown.appendChild(row);
+    });
+  }
+  function markRead(id){ const list = notifRead(); const it=list.find(x=>String(x.id)===String(id)); if(it) it.read=true; notifWrite(list); }
+  function removeNotif(id){ let list = notifRead(); list = list.filter(x=> String(x.id)!==String(id)); notifWrite(list); }
+
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  notifBtn.addEventListener('click', ()=> {
+    if(notifDropdown.style.display === 'none' || notifDropdown.style.display === ''){ notifDropdown.style.display='block'; notifDropdown.setAttribute('aria-hidden','false'); renderNotifs(); notifBtn.setAttribute('aria-expanded','true'); }
+    else { notifDropdown.style.display='none'; notifDropdown.setAttribute('aria-hidden','true'); notifBtn.setAttribute('aria-expanded','false'); }
+  });
+  document.addEventListener('click', (e)=> { if(!notifBtn.contains(e.target) && !notifDropdown.contains(e.target)){ notifDropdown.style.display='none'; notifBtn.setAttribute('aria-expanded','false'); }});
+  document.addEventListener('keydown', (e)=> { if(e.key==='Escape'){ notifDropdown.style.display='none'; notifBtn.setAttribute('aria-expanded','false'); }});
+
+  // integrate existing events to push notifications:
+  // When user sends Add Friend request (sendAdd)
+  const originalSendAdd = document.getElementById('sendAdd');
+  originalSendAdd && originalSendAdd.addEventListener('click', ()=>{
+    const val = (addInput.value || '').trim();
+    if(!val) return;
+    // push notification to local store: outgoing
+    addNotification({ title: 'Friend request', text: `You sent a friend request to ${val}` });
+    // also store into global notifications key (for other pages)
+    try{ const g = JSON.parse(localStorage.getItem(NKEY)||'[]'); g.push({ id: Date.now(), title:'Friend request', text:`You sent a friend request to ${val}`, ts:Date.now(), read:false }); localStorage.setItem(NKEY, JSON.stringify(g)); }catch(e){}
+  });
+
+  // When simulating incoming request, also add notif entry
+  const simInterval = setInterval(()=> {
+    if(Math.random() < 0.06){
+      const newUser = 'NewUser'+Math.floor(Math.random()*99);
+      requests.push({id:Date.now(), username:newUser, from:'Guest'});
+      saveState();
+      addNotification({ title:'New friend request', text:`${newUser} sent you a friend request` });
+      // also update global storage for index page
+      try{ const g = JSON.parse(localStorage.getItem(NKEY)||'[]'); g.push({ id: Date.now(), title:'New friend request', text:`${newUser} sent you a friend request`, ts:Date.now(), read:false }); localStorage.setItem(NKEY, JSON.stringify(g)); }catch(e){}
+      showToast('New friend request');
+    }
+  }, 12000);
+
+  // make sure to render badge initially
+  renderNotifs();
+
+  // Also listen storage event from other pages to refresh
+  window.addEventListener('storage', (e)=> { if(e.key === NKEY) renderNotifs(); });
+
+  // Helper to push notification from other actions (e.g., accept/decline)
+  function pushGlobalNotification(title, text){
+    try{ const g = JSON.parse(localStorage.getItem(NKEY)||'[]'); g.push({ id: Date.now(), title, text, ts:Date.now(), read:false }); localStorage.setItem(NKEY, JSON.stringify(g)); renderNotifs(); }catch(e){}
+  }
+
+  // modify existing accept handler to notify sender (demo)
+  // Note: we already add inside accept above; you can push more notifications via pushGlobalNotification(...)
+
+  // end notifications integration
+});
+</script>
+</body>
+</html>

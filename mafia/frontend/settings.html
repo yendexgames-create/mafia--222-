@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Settings — MafiaArena</title>
+<meta name="description" content="Settings — account, notifications, privacy and theme." />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+:root{--neon:#1F6FEB;--accent:#FFD369;--bg:#0D1117;--header-h:64px}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#071021,#0d1117 40%);color:#e6eef6}
+.topbar{position:fixed;left:0;right:0;top:0;height:var(--header-h);display:flex;align-items:center;z-index:60;backdrop-filter:blur(8px);background:linear-gradient(180deg,rgba(7,18,33,0.6),rgba(7,18,33,0.35));border-bottom:1px solid rgba(255,255,255,0.02)}
+.topbar-inner{width:100%;max-width:1300px;margin:0 auto;padding:0 18px;display:flex;align-items:center;justify-content:space-between;height:var(--header-h)}
+.brand{font-weight:800;background:linear-gradient(90deg,#ff6b6b,#ffd369);-webkit-background-clip:text;background-clip:text;color:transparent}
+.container{max-width:1200px;margin:0 auto;padding:calc(var(--header-h) + 20px) 18px 80px}
+
+/* layout */
+.layout{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
+@media(max-width:900px){.layout{grid-template-columns:1fr} .sidebar{order:2} .content{order:1}}
+
+/* sidebar */
+.sidebar{background:rgba(255,255,255,0.02);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer}
+.nav-item.active{background:linear-gradient(90deg,var(--neon),#00BFA6);color:#07121a;font-weight:700}
+
+/* content */
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.04));padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 12px 30px rgba(0,0,0,0.6)}
+.row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px dashed rgba(255,255,255,0.02)}
+.row:last-child{border-bottom:0}
+.label{font-weight:600}
+.small{color:rgba(230,238,246,0.7);font-size:13px}
+
+/* toggle switch */
+.switch{position:relative;width:54px;height:30px;background:rgba(255,255,255,0.04);border-radius:999px;border:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background .18s ease}
+.switch .knob{position:absolute;left:4px;top:4px;width:22px;height:22px;border-radius:50%;background:#08121a;transition:transform .18s ease, box-shadow .18s ease}
+.switch.on{background:linear-gradient(90deg,var(--neon),#00BFA6)}
+.switch.on .knob{transform:translateX(24px);box-shadow:0 8px 20px rgba(0,0,0,0.5)}
+
+/* select and buttons */
+.select{padding:8px 12px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit}
+.btn{padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer;border:0}
+.btn-primary{background:linear-gradient(90deg,var(--neon),#00BFA6);color:#07121a}
+.btn-danger{background:#FF6B6B;color:#07121a;padding:8px 12px;border-radius:10px;border:0}
+
+/* modal & toast */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:140}
+.modal{background:#0b1220;padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);width:100%;max-width:520px}
+.toast{position:fixed;right:18px;bottom:18px;background:#00bfa6;color:#07121a;padding:12px 16px;border-radius:10px;display:none;z-index:150;font-weight:700}
+
+/* background visuals */
+.bg-anim{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.bg-blob{position:absolute;border-radius:50%;filter:blur(120px) saturate(120%);opacity:0.06}
+.particles{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.particle{position:absolute;width:6px;height:6px;border-radius:50%;filter:blur(6px);mix-blend-mode:screen;opacity:.9;animation:float var(--dur) linear infinite}
+@keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-60px)}100%{transform:translateY(0)}}
+.smoke{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.28;filter:blur(1px)}
+.custom-cursor{position:fixed;left:0;top:0;width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,80,80,0.9);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;mix-blend-mode:screen;transition:transform .08s linear}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+  <!-- background -->
+  <div class="bg-anim" aria-hidden="true">
+    <div class="bg-blob" style="width:520px;height:520px;left:-80px;top:8%;background:radial-gradient(circle,#1F6FEB,#00BFA6)"></div>
+    <div class="bg-blob" style="width:420px;height:420px;right:-100px;top:30%;background:radial-gradient(circle,#FFD369,#FF8A5B)"></div>
+  </div>
+  <div class="particles" id="particles" aria-hidden="true"></div>
+  <canvas id="smoke" class="smoke" width="1600" height="900" aria-hidden="true"></canvas>
+  <div id="cursor" class="custom-cursor" aria-hidden="true"></div>
+
+  <!-- header -->
+  <header class="topbar" role="banner">
+    <div class="topbar-inner">
+      <div class="brand">MafiaArena</div>
+      <nav class="nav" aria-label="Main"><a href="index.html">Home</a><a href="play.html">Play</a></nav>
+    </div>
+  </header>
+
+  <main class="container" role="main">
+    <div class="layout">
+      <!-- sidebar -->
+      <aside class="sidebar">
+        <div class="card">
+          <div class="nav-item active" data-section="account">⚙️ Account</div>
+          <div class="nav-item" data-section="notifications">🔔 Notifications</div>
+          <div class="nav-item" data-section="privacy">🔒 Privacy</div>
+          <div class="nav-item" data-section="theme">🎨 Theme</div>
+        </div>
+      </aside>
+
+      <!-- content -->
+      <section class="content">
+        <!-- Account -->
+        <div class="card section" id="account">
+          <h3>Account</h3>
+          <div class="row">
+            <div>
+              <div class="label">Language</div>
+              <div class="small muted">Select interface language</div>
+            </div>
+            <select id="lang" class="select">
+              <option value="en">English</option>
+              <option value="uz">Uzbek</option>
+              <option value="ru">Russian</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <div><div class="label">Delete Account</div><div class="small muted">Permanently remove your account</div></div>
+            <button id="deleteBtn" class="btn-danger">Delete Account</button>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="card section" id="notifications" style="display:none">
+          <h3>Notifications</h3>
+          <div class="row">
+            <div><div class="label">Sound Effects</div><div class="small muted">Play UI sound effects</div></div>
+            <div class="switch" id="toggleSound" role="switch" aria-checked="true"><div class="knob"></div></div>
+          </div>
+
+          <div class="row">
+            <div><div class="label">Animations</div><div class="small muted">Enable UI animations</div></div>
+            <div class="switch" id="toggleAnim" role="switch" aria-checked="true"><div class="knob"></div></div>
+          </div>
+
+          <div class="row">
+            <div><div class="label">Sound Test</div><div class="small muted">Play a sample notification</div></div>
+            <div><button id="soundTest" class="btn">Play</button></div>
+          </div>
+        </div>
+
+        <!-- Privacy -->
+        <div class="card section" id="privacy" style="display:none">
+          <h3>Privacy</h3>
+          <div class="row">
+            <div><div class="label">Show country publicly</div><div class="small muted">Control profile visibility</div></div>
+            <div class="switch" id="toggleCountry" role="switch" aria-checked="true"><div class="knob"></div></div>
+          </div>
+
+          <div class="row">
+            <div><div class="label">Profile visibility</div><div class="small muted">Public / Friends only / Private</div></div>
+            <select id="visibility" class="select">
+              <option>Public</option><option>Friends only</option><option>Private</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Theme -->
+        <div class="card section" id="theme" style="display:none">
+          <h3>Theme</h3>
+          <div class="row">
+            <div><div class="label">Dark Mode</div><div class="small muted">Toggle dark/light theme</div></div>
+            <div class="switch" id="toggleTheme" role="switch" aria-checked="true"><div class="knob"></div></div>
+          </div>
+
+          <div class="row">
+            <div><div class="label">Save changes</div><div class="small muted">Persist your preferences</div></div>
+            <div><button id="saveBtn" class="btn btn-primary">Save Changes</button></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Delete modal -->
+  <div id="deleteModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <h3 style="color:#FF6B6B">Delete account</h3>
+      <p class="muted">This action is irreversible. All your data will be permanently deleted.</p>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button id="cancelDelete" class="btn">Cancel</button>
+        <button id="confirmDelete" class="btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Saved</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', ()=> {
+  // sidebar navigation
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = Array.from(document.querySelectorAll('.card.section'));
+  function showSection(id){
+    sections.forEach(s => s.id === id ? s.style.display = '' : s.style.display = 'none');
+    navItems.forEach(n => n.dataset.section === id ? n.classList.add('active') : n.classList.remove('active'));
+    const el = document.getElementById(id);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+  navItems.forEach(it => it.addEventListener('click', ()=> showSection(it.dataset.section)));
+  // initial
+  showSection('account');
+
+  // switches helper
+  function setSwitch(el, on){
+    if(on) el.classList.add('on'); else el.classList.remove('on');
+    el.setAttribute('aria-checked', on ? 'true' : 'false');
+  }
+  document.querySelectorAll('.switch').forEach(sw=>{
+    setSwitch(sw, sw.getAttribute('aria-checked') === 'true');
+    sw.addEventListener('click', ()=> setSwitch(sw, !sw.classList.contains('on')));
+  });
+
+  // sound test
+  const soundTest = document.getElementById('soundTest');
+  function playBeep(){ try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type='sine'; o.frequency.value=880; g.gain.value=0.0001;
+    o.connect(g); g.connect(ctx.destination); o.start();
+    g.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.28);
+    setTimeout(()=>{ o.stop(); try{ctx.close()}catch(e){} }, 400);
+  }catch(e){ console.warn('Audio not supported'); } }
+  soundTest && soundTest.addEventListener('click', ()=> playBeep());
+
+  // delete modal
+  const deleteBtn = document.getElementById('deleteBtn'), deleteModal = document.getElementById('deleteModal'), cancelDelete = document.getElementById('cancelDelete'), confirmDelete = document.getElementById('confirmDelete');
+  deleteBtn && deleteBtn.addEventListener('click', ()=> { deleteModal.style.display='flex'; deleteModal.setAttribute('aria-hidden','false'); });
+  cancelDelete && cancelDelete.addEventListener('click', ()=> { deleteModal.style.display='none'; deleteModal.setAttribute('aria-hidden','true'); });
+  confirmDelete && confirmDelete.addEventListener('click', ()=> { deleteModal.style.display='none'; deleteModal.setAttribute('aria-hidden','true'); alert('Account deletion simulated.'); });
+
+  // save toast
+  const saveBtn = document.getElementById('saveBtn'), toast = document.getElementById('toast');
+  saveBtn && saveBtn.addEventListener('click', ()=> {
+    toast.textContent = 'Settings saved';
+    toast.style.display = 'block';
+    setTimeout(()=> toast.style.display = 'none', 2200);
+  });
+
+  // background visuals (particles, smoke, cursor)
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const particles = document.getElementById('particles');
+  if(particles && !prefersReduced){
+    const count = Math.max(10, Math.floor(window.innerWidth/90));
+    for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='particle'; const s=3+Math.random()*8; d.style.width=d.style.height=s+'px'; d.style.left=(Math.random()*100)+'%'; d.style.top=(Math.random()*100)+'%'; d.style.setProperty('--dur',(6+Math.random()*8)+'s'); particles.appendChild(d); }
+  }
+  const canvas = document.getElementById('smoke');
+  if(canvas && !prefersReduced){
+    const ctx = canvas.getContext('2d'); let t=0; (function l(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(let i=0;i<3;i++){ ctx.beginPath(); const y=canvas.height*0.45 + Math.sin(t*0.5 + i)*12*(i+1); ctx.ellipse(canvas.width*0.5,y,canvas.width*0.45-i*120,30+i*8,0,0,Math.PI*2); ctx.fillStyle = `rgba(255,255,255,${0.006 + i*0.01})`; ctx.fill(); } t+=0.012; requestAnimationFrame(l); })();
+  }
+  const cursor = document.getElementById('cursor'); if(cursor) document.addEventListener('mousemove', e=> cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`);
+});
+</script>
+</body>
+</html>

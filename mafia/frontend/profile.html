@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Profile — MafiaArena</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:linear-gradient(180deg,#071021,#0d1117);color:#e6eef6;font-family:Inter,system-ui,Arial;padding:24px}
+  .card{max-width:720px;margin:28px auto;padding:18px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+  .avatar{width:84px;height:84px;border-radius:12px;background:#0b1220;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:32px;margin-right:16px}
+  .row{display:flex;align-items:center}
+  label{display:block;margin-top:10px;color:rgba(230,238,246,0.7)}
+  input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;margin-top:6px}
+  .btn{padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
+  .btn-primary{background:linear-gradient(90deg,#1F6FEB,#00BFA6);color:#07121a}
+  .muted{color:rgba(230,238,246,0.7);margin-top:8px}
+  .actions{display:flex;gap:8px;margin-top:12px}
+</style>
+</head>
+<body>
+  <div class="card" role="main" aria-labelledby="pTitle">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h2 id="pTitle">Profile</h2>
+      <div><a href="index.html" class="btn" style="color:#ffd369;text-decoration:none">← Home</a></div>
+    </div>
+
+    <div id="viewArea" style="margin-top:12px">
+      <div class="row">
+        <div id="pfAvatar" class="avatar">U</div>
+        <div style="flex:1">
+          <div style="font-weight:800;font-size:1.1rem" id="pfNameDisplay">Player</div>
+          <div class="muted" id="pfEmailDisplay">no-email</div>
+          <div class="muted" id="pfLvlDisplay">Lv. 1</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <div class="muted">Country:</div><div id="pfCountry" class="muted">—</div>
+        <div class="muted" style="margin-top:8px">Gender:</div><div id="pfGender" class="muted">—</div>
+      </div>
+
+      <div class="actions">
+        <button id="editBtn" class="btn btn-primary">Edit Profile</button>
+        <button id="logoutBtn" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.04)">Logout</button>
+      </div>
+    </div>
+
+    <form id="editForm" style="display:none;margin-top:12px">
+      <label>First name</label><input id="inName" />
+      <label>Surname</label><input id="inSurname" />
+      <label>Email</label><input id="inEmail" type="email" />
+      <label>Country</label><input id="inCountry" />
+      <label>Gender</label><input id="inGender" />
+      <div class="actions">
+        <button type="button" id="saveBtn" class="btn btn-primary">Save</button>
+        <button type="button" id="cancelBtn" class="btn">Cancel</button>
+      </div>
+      <div id="msg" class="muted" style="margin-top:8px"></div>
+    </form>
+  </div>
+
+<script>
+(function(){
+  function getUsers(){ try{ return JSON.parse(localStorage.getItem('mafia_users')||'[]'); }catch(e){ return []; } }
+  function setUsers(u){ try{ localStorage.setItem('mafia_users', JSON.stringify(u)); }catch(e){} }
+  function getSession(){ try{ return JSON.parse(localStorage.getItem('mafiaUser')); }catch(e){ return null; } }
+  function setSession(u){ try{ localStorage.setItem('mafiaUser', JSON.stringify(u)); }catch(e){} }
+
+  const pfAvatar = document.getElementById('pfAvatar');
+  const pfNameDisplay = document.getElementById('pfNameDisplay');
+  const pfEmailDisplay = document.getElementById('pfEmailDisplay');
+  const pfLvlDisplay = document.getElementById('pfLvlDisplay');
+  const pfCountry = document.getElementById('pfCountry');
+  const pfGender = document.getElementById('pfGender');
+
+  const editBtn = document.getElementById('editBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const editForm = document.getElementById('editForm');
+  const viewArea = document.getElementById('viewArea');
+  const inName = document.getElementById('inName');
+  const inSurname = document.getElementById('inSurname');
+  const inEmail = document.getElementById('inEmail');
+  const inCountry = document.getElementById('inCountry');
+  const inGender = document.getElementById('inGender');
+  const saveBtn = document.getElementById('saveBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const msg = document.getElementById('msg');
+
+  function render(){
+    const u = getSession();
+    if(!u){
+      pfNameDisplay.textContent = 'Guest';
+      pfEmailDisplay.textContent = '';
+      pfLvlDisplay.textContent = '';
+      pfAvatar.textContent = 'U';
+      pfCountry.textContent = '';
+      pfGender.textContent = '';
+      return;
+    }
+    pfNameDisplay.textContent = u.name + (u.surname ? ' ' + u.surname : '');
+    pfEmailDisplay.textContent = u.email || '';
+    pfLvlDisplay.textContent = 'Lv. ' + (u.level || 1);
+    if(u.avatar && u.avatar.startsWith('data:')){ pfAvatar.style.backgroundImage = `url(${u.avatar})`; pfAvatar.textContent=''; } else { pfAvatar.style.backgroundImage = ''; pfAvatar.textContent = (u.avatar || (u.name? u.name.charAt(0):'U')).charAt(0).toUpperCase(); }
+    pfCountry.textContent = u.country || '—';
+    pfGender.textContent = u.gender || '—';
+  }
+
+  editBtn.addEventListener('click', ()=>{
+    const u = getSession() || {};
+    inName.value = u.name || '';
+    inSurname.value = u.surname || '';
+    inEmail.value = u.email || '';
+    inCountry.value = u.country || '';
+    inGender.value = u.gender || '';
+    viewArea.style.display = 'none';
+    editForm.style.display = 'block';
+    msg.textContent = '';
+  });
+
+  cancelBtn.addEventListener('click', ()=>{
+    editForm.style.display = 'none';
+    viewArea.style.display = 'block';
+  });
+
+  saveBtn.addEventListener('click', ()=>{
+    const users = getUsers();
+    const u = getSession() || {};
+    u.name = (inName.value||'').trim();
+    u.surname = (inSurname.value||'').trim();
+    u.email = (inEmail.value||'').trim().toLowerCase();
+    u.country = (inCountry.value||'').trim();
+    u.gender = (inGender.value||'').trim();
+    // update mafia_users list if matching email exists (or update by previous email)
+    // try to find index by email or by name
+    let idx = users.findIndex(x => x.email === u.email);
+    if(idx === -1 && u.email){
+      // try match by previous session email
+      const prev = getSession();
+      if(prev && prev.email){
+        idx = users.findIndex(x => x.email === prev.email);
+      }
+    }
+    if(idx !== -1){
+      users[idx] = Object.assign({}, users[idx], u);
+    } else if(u.email){
+      users.push(u);
+    }
+    setUsers(users);
+    setSession(u);
+    // update other pages
+    try{ window.dispatchEvent(new StorageEvent('storage',{key:'mafiaUser',newValue:JSON.stringify(u)})); }catch(e){}
+    msg.textContent = 'Saved. Redirecting to Home...';
+    setTimeout(()=> location.href = 'index.html', 900);
+  });
+
+  logoutBtn.addEventListener('click', ()=>{
+    if(confirm('Logout?')){ localStorage.removeItem('mafiaUser'); location.href='index.html'; }
+  });
+
+  // initial render
+  render();
+})();
+</script>
+</body>
+</html>

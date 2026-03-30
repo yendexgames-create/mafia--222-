@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Game — MafiaArena</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#071021,#0d1117);color:#e6eef6}
+/* fixed topbar */
+.topbar{position:fixed;left:0;right:0;top:0;height:64px;z-index:9999;backdrop-filter:blur(6px);background:linear-gradient(180deg,rgba(7,18,33,0.85),rgba(7,18,33,0.6));display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.brand{font-weight:900;background:linear-gradient(90deg,#ffd369,#ff6b6b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.profile-area{display:flex;align-items:center;gap:10px}
+.profile-avatar{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;background:linear-gradient(90deg,#ffd369,#ff6b6b);color:#07121a}
+.container{max-width:1000px;margin:100px auto;padding:18px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.04));padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+.players{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.player{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.01)}
+.player .avatar{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#ffd369,#ff6b6b);color:#07121a;font-weight:800}
+.controls{margin-top:12px;display:flex;gap:8px;align-items:center}
+.btn{padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
+.btn-primary{background:linear-gradient(90deg,#1F6FEB,#00BFA6);color:#07121a}
+.leave-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#ffd369}
+.notice{margin-top:12px;color:rgba(230,238,246,0.8)}
+.small{font-size:13px;color:rgba(230,238,246,0.7)}
+</style>
+</head>
+<body>
+  <header class="topbar" role="banner">
+    <div class="brand">MafiaArena</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="profile-area">
+        <div id="topAvatar" class="profile-avatar">U</div>
+        <div style="text-align:right">
+          <div id="topName" style="font-weight:800">Guest</div>
+          <div id="topLevel" class="small">Lv. 1</div>
+        </div>
+        <div id="topSettings" style="margin-left:12px">
+          <button id="settingsBtn" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.04);border-radius:8px">⚙️</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h2 id="roomTitle">Loading room...</h2>
+      <div id="roomMeta" class="small">...</div>
+
+      <div class="controls">
+        <button id="leaveBtn" class="leave-btn">Leave</button>
+        <div id="ownerBadge" class="small" style="margin-left:auto;color:rgba(255,215,128,0.9)"></div>
+      </div>
+
+      <div style="display:flex;gap:18px;margin-top:12px;">
+        <div style="flex:1">
+          <div id="content" class="notice">Game area placeholder</div>
+        </div>
+        <aside style="width:280px">
+          <div class="card">
+            <div style="font-weight:900">Players</div>
+            <div id="playersList" class="players"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+(async function(){
+  function qs(k){ return new URLSearchParams(location.search).get(k); }
+  const roomId = qs('roomId');
+  if(!roomId){ alert('No room specified'); location.href='play.html'; return; }
+
+  // profile UI in topbar
+  function refreshProfileUI(){
+    const u = (function(){ try{ return JSON.parse(localStorage.getItem('mafiaUser')||'null'); }catch(e){ return null; } })();
+    const avatarEl = document.getElementById('topAvatar');
+    const nameEl = document.getElementById('topName');
+    const lvlEl = document.getElementById('topLevel');
+    if(u){
+      avatarEl.textContent = (u.avatar || (u.name?u.name.charAt(0):'U')).charAt(0).toUpperCase();
+      nameEl.textContent = (u.name||u.email||'Player');
+      lvlEl.textContent = 'Lv. ' + (u.level || 1);
+    } else {
+      avatarEl.textContent = 'U';
+      nameEl.textContent = 'Guest';
+      lvlEl.textContent = 'Lv. 1';
+    }
+  }
+  refreshProfileUI();
+
+  document.getElementById('settingsBtn').addEventListener('click', ()=> {
+    const u = (function(){ try{ return JSON.parse(localStorage.getItem('mafiaUser')||'null'); }catch(e){ return null; } })();
+    if(!u) { location.href = 'login.html'; return; }
+    // simple dropdown choices
+    const action = prompt('Type "profile" to open profile, "logout" to logout:');
+    if(action === 'logout'){ localStorage.removeItem('mafiaUser'); location.href='index.html'; }
+    if(action === 'profile'){ location.href = 'profile.html'; }
+  });
+
+  // UI helpers
+  function renderPlayers(list){
+    const ul = document.getElementById('playersList');
+    ul.innerHTML = '';
+    if(!list || list.length === 0){ ul.innerHTML = '<div class="small">No players yet</div>'; return; }
+    list.forEach(name=>{
+      const div = document.createElement('div'); div.className = 'player';
+      const avatar = document.createElement('div'); avatar.className='avatar'; avatar.textContent = String(name||'U').charAt(0).toUpperCase();
+      const meta = document.createElement('div'); meta.style.flex = '1'; meta.innerHTML = `<div style="font-weight:800">${escapeHtml(name||'Guest')}</div>`;
+      div.appendChild(avatar); div.appendChild(meta);
+      ul.appendChild(div);
+    });
+  }
+
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // fetch room and populate
+  async function fetchRoom(){
+    try{
+      const res = await fetch('/api/rooms/' + encodeURIComponent(roomId));
+      if(!res.ok) throw new Error('Room not found');
+      const r = await res.json();
+      document.getElementById('roomTitle').textContent = r.name || 'Room';
+      document.getElementById('roomMeta').textContent = `Host: ${r.host || r.creatorName || 'Host'} • Players: ${(r.joined?r.joined.length:0)}/${r.size || 8} ${r.password ? '• Locked' : ''}`;
+      renderPlayers(r.joined || []);
+      const user = (function(){ try{ return JSON.parse(localStorage.getItem('mafiaUser')||'null'); }catch(e){ return null; } })();
+      const ownerBadge = document.getElementById('ownerBadge');
+      ownerBadge.textContent = (user && ((user.email && r.creatorId && user.email === r.creatorId) || (user.name && r.creatorName && user.name === r.creatorName))) ? 'You are the owner' : '';
+    }catch(err){
+      alert('Failed to load room: ' + (err && err.message ? err.message : 'unknown'));
+      location.href='play.html';
+    }
+  }
+
+  // socket logic
+  const socket = io();
+  socket.on('connect', ()=> {
+    console.log('socket connected', socket.id);
+    socket.emit('subscribe', roomId);
+    // register as creator if appropriate
+    (async ()=>{
+      try{
+        const user = (function(){ try{ return JSON.parse(localStorage.getItem('mafiaUser')||'null'); }catch(e){ return null; } })();
+        if(!user) return;
+        const rres = await fetch('/api/rooms/' + encodeURIComponent(roomId));
+        if(!rres.ok) return;
+        const r = await rres.json();
+        const isCreator = (user.email && r.creatorId && user.email === r.creatorId) || (user.name && r.creatorName && user.name === r.creatorName);
+        if(isCreator){
+          socket.emit('registerCreator', { roomId, creatorId: user.email || user.name });
+        }
+      }catch(e){}
+    })();
+  });
+
+  socket.on('playerJoined', (data)=> {
+    if(data && data.roomId === roomId){
+      fetchRoom();
+    }
+  });
+  socket.on('playerLeft', (data)=> {
+    if(data && data.roomId === roomId){
+      fetchRoom();
+    }
+  });
+  socket.on('roomUpdated', (d)=> { if(d && d.roomId === roomId) fetchRoom(); });
+
+  socket.on('roomClosed', (d)=>{
+    if(d && d.roomId === roomId){
+      alert(d.message || 'Room closed by owner');
+      setTimeout(()=> location.href='play.html', 600);
+    }
+  });
+  socket.on('roomDeleted', (d)=>{
+    if(d && d.roomId === roomId){
+      alert('Room has been deleted by owner');
+      setTimeout(()=> location.href='play.html', 600);
+    }
+  });
+
+  // Leave button behavior
+  document.getElementById('leaveBtn').addEventListener('click', async ()=>{
+    const user = (function(){ try{ return JSON.parse(localStorage.getItem('mafiaUser')||'null'); }catch(e){ return null; } })();
+    if(!user){ location.href='play.html'; return; }
+    if(!confirm('Are you sure you want to leave this room?')) return;
+    try{
+      // if user is creator, the server will close the room
+      const res = await fetch('/api/rooms/' + encodeURIComponent(roomId) + '/leave', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: user.name || user.email, creatorId: user.email || user.name }) });
+      const body = await res.json().catch(()=>({}));
+      if(!res.ok){ alert(body.error || 'Leave failed'); return; }
+      if(body.closed){
+        alert('Room closed. Redirecting to Play.');
+        setTimeout(()=> location.href='play.html', 400);
+      } else {
+        // left successfully
+        location.href = 'play.html';
+      }
+    }catch(e){
+      alert('Network error');
+    }
+  });
+
+  // cleanup on unload
+  window.addEventListener('beforeunload', ()=> { try{ socket.emit('unsubscribe', roomId); }catch(e){} });
+
+  // initial
+  await fetchRoom();
+
+})();
+</script>
+</body>
+</html>

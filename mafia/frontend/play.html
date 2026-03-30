@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Play — MafiaArena</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--neon:#1F6FEB}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#071021,#0d1117);color:#e6eef6}
+body{padding-top:76px} /* header space */
+.topbar{
+  position:fixed;left:0;right:0;top:0;height:64px;z-index:9999;
+  display:flex;align-items:center;justify-content:space-between;padding:8px 18px;
+  background:linear-gradient(180deg,rgba(7,18,33,0.92),rgba(7,18,33,0.7));
+  border-bottom:1px solid rgba(255,255,255,0.02)
+}
+.brand{font-weight:900;background:linear-gradient(90deg,#ffd369,#ff6b6b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav{display:flex;gap:12px;align-items:center}
+.nav a{color:inherit;text-decoration:none;padding:6px 10px;border-radius:8px;opacity:.95}
+.container{max-width:1100px;margin:24px auto;padding:0 18px}
+.layout{display:grid;grid-template-columns:320px 1fr;gap:18px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.04));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+.small{font-size:13px;color:rgba(230,238,246,0.7)}
+.row{display:flex;gap:8px;align-items:center}
+input[type="text"], input[type="password"]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+.btn{padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
+.btn-primary{background:linear-gradient(90deg,var(--neon),#00BFA6);color:#07121a}
+.lock{padding:6px;border-radius:8px;background:#ffd369;color:#07121a;font-weight:800}
+.rooms-list{display:grid;gap:12px;margin-top:12px}
+.room{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+.modal-backdrop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:11000}
+.modal{width:100%;max-width:520px;background:#0b1220;padding:18px;border-radius:12px;z-index:11050;border:1px solid rgba(255,255,255,0.04)}
+.profile-area{display:flex;align-items:center;gap:12px}
+.profile-avatar{width:44px;height:44px;border-radius:10px;background:linear-gradient(90deg,#ffd369,#ff6b6b);color:#07121a;display:flex;align-items:center;justify-content:center;font-weight:900}
+@media(max-width:900px){ .layout{grid-template-columns:1fr} .nav{display:none} body{padding-top:88px} }
+</style>
+</head>
+<body>
+  <header class="topbar" role="banner">
+    <div style="display:flex;align-items:center;gap:18px">
+      <div class="brand">MafiaArena</div>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="play.html" aria-current="page">Play</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="store.html">Store</a>
+      </nav>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px">
+      <div id="profileArea" class="profile-area" aria-haspopup="true">
+        <div id="avatar" class="profile-avatar">U</div>
+        <div style="text-align:right">
+          <div id="pname" style="font-weight:700">Guest</div>
+          <div id="plvl" class="small">Lv. 1</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" role="main">
+    <div class="layout">
+      <aside>
+        <div class="card">
+          <div style="font-weight:900">Create Room</div>
+          <div style="margin-top:10px">
+            <label>Room name</label>
+            <input id="roomName" type="text" placeholder="My Private Game" />
+            <label class="small" style="margin-top:8px">Max players</label>
+            <input id="roomSize" type="text" placeholder="8" />
+            <div class="row" style="margin-top:8px">
+              <label style="flex:1"><input id="requirePass" type="checkbox" /> Require password</label>
+            </div>
+            <div id="passWrap" style="display:none;margin-top:8px">
+              <label>Password</label>
+              <input id="roomPass" type="password" />
+            </div>
+            <div style="margin-top:10px;text-align:right">
+              <button id="createBtn" class="btn btn-primary">Create</button>
+            </div>
+            <div id="createMsg" class="small" style="margin-top:8px"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div style="font-weight:900">My Rooms</div>
+          <div id="myRooms" style="margin-top:10px" class="small">Loading...</div>
+        </div>
+      </aside>
+
+      <section>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:900">Available Games</div>
+            <div class="small"><button id="refreshBtn" class="btn">Refresh</button></div>
+          </div>
+
+          <div id="rooms" class="rooms-list"><div class="small">Loading...</div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" id="modalDialog">
+      <div id="modalTitle" style="font-weight:900">Enter password</div>
+      <div style="margin-top:8px"><input id="modalPass" type="password" placeholder="Room password" /></div>
+      <div style="margin-top:12px;text-align:right">
+        <button id="modalCancel" class="btn">Cancel</button>
+        <button id="modalConfirm" class="btn btn-primary">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+  (function(){
+    const api = {
+      getRooms: ()=> fetch('/api/rooms').then(r=>r.json()),
+      createRoom: (b)=> fetch('/api/rooms',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json().then(j=>({ok:r.ok,body:j}))),
+      joinRoom: (id,payload)=> fetch(`/api/rooms/${encodeURIComponent(id)}/join`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(r=>({ok:r.ok,body: r.ok? r.json(): r.json().then(j=>j)})),
+      updateRoom: (id,payload)=> fetch(`/api/rooms/${encodeURIComponent(id)}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(r=>({ok:r.ok,body:r.json().catch(()=>({}))})),
+      deleteRoom: (id,payload)=> fetch(`/api/rooms/${encodeURIComponent(id)}`,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(r=>({ok:r.ok,body:r.json().catch(()=>({}))}))
+    };
+
+    const socket = io();
+    const roomsEl = document.getElementById('rooms');
+    const myRoomsEl = document.getElementById('myRooms');
+    const createBtn = document.getElementById('createBtn');
+    const createMsg = document.getElementById('createMsg');
+    const requirePass = document.getElementById('requirePass');
+    const passWrap = document.getElementById('passWrap');
+    const modal = document.getElementById('modal');
+    const modalPass = document.getElementById('modalPass');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalCancel = document.getElementById('modalCancel');
+    const modalConfirm = document.getElementById('modalConfirm');
+
+    function readUser(){ try{ return JSON.parse(localStorage.getItem('mafiaUser')||'null'); }catch(e){ return null; } }
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function showModal(title){ modalTitle.textContent=title||'Enter password'; modalPass.value=''; modal.style.display='flex'; modal.setAttribute('aria-hidden','false'); setTimeout(()=>modalPass.focus(),60); return new Promise(res=>{ modalCancel.onclick=()=>{modal.style.display='none';modal.setAttribute('aria-hidden','true');res({confirm:false});}; modalConfirm.onclick=()=>{const p=modalPass.value||'';modal.style.display='none';modal.setAttribute('aria-hidden','true');res({confirm:true,pass:p});}; modalPass.onkeydown=(e)=>{ if(e.key==='Enter') modalConfirm.click(); }; }); }
+
+    // toggles
+    requirePass.addEventListener('change', ()=> passWrap.style.display = requirePass.checked ? '' : 'none');
+
+    // event delegation for join buttons
+    roomsEl.addEventListener('click', async (e)=>{
+      const btn = e.target.closest('.joinBtn');
+      if(!btn) return;
+      const id = btn.dataset.id; const locked = btn.dataset.lock === '1';
+      const user = readUser(); if(!user){ location.href = 'login.html?msg=' + encodeURIComponent('Please login'); return; }
+      let pwd='';
+      if(locked){ const ok = await showModal('Enter room password'); if(!ok.confirm) return; pwd=ok.pass||''; }
+      btn.disabled = true;
+      try{
+        const resp = await api.joinRoom(id, { name: user.name || user.email, password: pwd, creatorId: user.email || '' });
+        if(!resp.ok){ alert(resp.body && resp.body.error ? resp.body.error : 'Join failed'); btn.disabled=false; return; }
+        window.location.href = `game.html?roomId=${encodeURIComponent(id)}`;
+      }catch(err){ alert('Network error'); btn.disabled=false; }
+    });
+
+    // create room
+    createBtn.addEventListener('click', async ()=>{
+      const user = readUser(); if(!user){ location.href = 'login.html?msg=' + encodeURIComponent('Please login'); return; }
+      const name = document.getElementById('roomName').value.trim();
+      const size = Number(document.getElementById('roomSize').value.trim()) || 8;
+      const pwd = requirePass.checked ? (document.getElementById('roomPass').value||'') : '';
+      if(!name){ createMsg.textContent='Enter room name'; return; }
+      createBtn.disabled = true; createMsg.textContent = 'Creating...';
+      try{
+        const {ok,body} = await api.createRoom({ name, size, password: pwd, host: user.name||user.email, creatorName: user.name||user.email, creatorId: user.email||('guest_'+Date.now()) });
+        if(!ok){ createMsg.textContent = body && body.error ? body.error : 'Create failed'; createBtn.disabled=false; return; }
+        // success
+        loadRooms(); loadMyRooms();
+        window.location.href = 'game.html?roomId=' + encodeURIComponent(body.id);
+      }catch(e){ createMsg.textContent='Network error'; createBtn.disabled=false; }
+    });
+
+    // render rooms list
+    function renderRooms(list){
+      roomsEl.innerHTML = '';
+      if(!list.length){ roomsEl.innerHTML = '<div class="small">No active rooms</div>'; return; }
+      list.forEach(r=>{
+        const div=document.createElement('div'); div.className='room';
+        div.innerHTML = `<div><div style="font-weight:800">${escapeHtml(r.name)}</div><div class="small" style="color:rgba(230,238,246,0.65)">${(r.joined||0)}/${r.size||8}</div></div>
+          <div style="display:flex;gap:8px;align-items:center">${r.locked?'<div class="lock">LOCK</div>':''}
+          <button class="btn joinBtn" data-id="${escapeHtml(r.id)}" ${r.locked?'data-lock="1"':''}>Join</button></div>`;
+        roomsEl.appendChild(div);
+      });
+    }
+
+    // my rooms - will show controls for creator to update/delete
+    async function loadMyRooms(){
+      const container = myRoomsEl; const user = readUser(); if(!user){ container.innerHTML='<div class="small">Login to manage your rooms</div>'; return; }
+      container.innerHTML = '<div class="small">Loading...</div>';
+      try{
+        const list = await api.getRooms();
+        const mine = (list || []).filter(r => (r.creatorId && r.creatorId === (user.email||'')) || (r.creatorName && r.creatorName === (user.name||'')));
+        container.innerHTML = '';
+        if(!mine.length){ container.innerHTML='<div class="small">You have no active rooms</div>'; return; }
+        mine.forEach(r=>{
+          const wr = document.createElement('div'); wr.className='card'; wr.style.padding='8px'; wr.style.marginTop='8px';
+          wr.innerHTML = `<div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div style="font-weight:800">${escapeHtml(r.name)}</div><div class="small">${(r.joined||0)}/${r.size||8} players</div></div>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+              <input type="password" class="mr-pass" data-id="${escapeHtml(r.id)}" placeholder="${r.locked?'Change password':'Set password'}" style="padding:6px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);width:160px;color:inherit" />
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-primary mr-save" data-id="${escapeHtml(r.id)}">Save</button>
+                <button class="btn mr-del" data-id="${escapeHtml(r.id)}" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:#ff6b6b">Delete</button>
+              </div>
+            </div></div>`;
+          container.appendChild(wr);
+        });
+        // attach handlers (delegation)
+        container.querySelectorAll('.mr-save').forEach(btn=>{
+          btn.onclick = async ()=>{
+            const id = btn.dataset.id; const input = container.querySelector(`.mr-pass[data-id="${id}"]`); const pass = input? input.value : '';
+            btn.disabled=true;
+            try{
+              const user = readUser(); if(!user){ alert('Please login'); btn.disabled=false; return; }
+              const res = await api.updateRoom(id,{ creatorId: user.email || '', password: pass });
+              if(!res.ok){ alert(res.body && res.body.error ? res.body.error : 'Update failed'); } else { alert('Updated'); loadMyRooms(); loadRooms(); }
+            }catch(e){ alert('Network error'); }
+            btn.disabled=false;
+          };
+        });
+        container.querySelectorAll('.mr-del').forEach(btn=>{
+          btn.onclick = async ()=>{
+            if(!confirm('Delete this room?')) return;
+            const id = btn.dataset.id; btn.disabled=true;
+            try{
+              const user = readUser(); if(!user){ alert('Please login'); btn.disabled=false; return; }
+              const res = await api.deleteRoom(id,{ creatorId: user.email || '' });
+              if(!res.ok){ alert(res.body && res.body.error ? res.body.error : 'Delete failed'); } else { alert('Deleted'); loadMyRooms(); loadRooms(); }
+            }catch(e){ alert('Network error'); }
+            btn.disabled=false;
+          };
+        });
+      }catch(e){ container.innerHTML='<div class="small">Unable to load your rooms</div>'; }
+    }
+
+    // load / refresh
+    async function loadRooms(){
+      roomsEl.innerHTML = '<div class="small">Loading...</div>';
+      try{ const list = await api.getRooms(); renderRooms(list || []); } catch(e){ roomsEl.innerHTML = '<div class="small">Unable to fetch rooms</div>'; }
+    }
+
+    // realtime: update lists
+    socket.on('roomCreated', ()=> loadRooms());
+    socket.on('roomUpdated', ()=> { loadRooms(); loadMyRooms(); });
+    socket.on('roomDeleted', (d)=> { loadRooms(); loadMyRooms(); if(d && d.roomId) console.log('room deleted', d.roomId); });
+    socket.on('roomClosed', (d)=> { if(d && d.roomId) { alert(d.message || 'Room closed'); loadRooms(); loadMyRooms(); } });
+
+    // initial
+    loadRooms(); loadMyRooms();
+
+    // wire refresh btn
+    document.getElementById('refreshBtn').addEventListener('click', ()=> { loadRooms(); loadMyRooms(); });
+
+    // ensure modal hides on ESC/click outside
+    modal.addEventListener('click', (e)=> { if(e.target === modal) { modal.style.display='none'; modal.setAttribute('aria-hidden','true'); } });
+    document.addEventListener('keydown', (e)=> { if(e.key === 'Escape') { modal.style.display='none'; modal.setAttribute('aria-hidden','true'); } });
+
+    // expose for debugging
+    window.MafiaPlay = { loadRooms, loadMyRooms };
+
+  })();
+  </script>
+</body>
+</html>

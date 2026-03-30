@@ -1,0 +1,955 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mafia Online — Home</title>
+  <meta name="description" content="Mafia Online — play, deceive and survive. Real-time multiplayer, private rooms and tournaments." />
+  <meta property="og:title" content="Mafia Online" />
+  <meta property="og:description" content="Join the tactical, real-time Mafia community." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    /* page-specific utilities */
+    :root{
+      --neon: #ff3b3b;
+      --glass: rgba(255,255,255,0.03);
+      --maxw: 1400px;
+    }
+    html,body{height:100%}
+    body{background:#0D1117;color:#e6eef6;font-family:Inter,system-ui,Arial;margin:0}
+    .container{max-width:var(--maxw);margin:0 auto;padding:0 18px}
+    /* sticky header */
+    .topbar{position:sticky;top:0;z-index:40;padding:14px 0;backdrop-filter:blur(6px)}
+    .topbar-inner{display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;gap:10px;align-items:center;font-weight:700;font-size:1.1rem;
+  background:linear-gradient(90deg,#ff6b6b,#ffd369);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .mask{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(90deg,#7a1a1a,#2b0b0b);
+  display:flex;align-items:center;justify-content:center;
+  color:#ffe89e;font-weight:800;cursor:pointer;
+}
+    .nav{display:flex;gap:18px;align-items:center}
+    .nav a{color:inherit;text-decoration:none;opacity:.9}
+    .btn{padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer;transition:all .25s ease}
+    .btn-primary{background:linear-gradient(90deg,var(--neon),#ff8a5b);color:#07121a}
+    .btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit}
+    /* hero */
+    .hero{min-height:84vh;display:grid;grid-template-columns:1fr 520px;gap:28px;align-items:center;padding:36px 0}
+    .hero-left{max-width:720px}
+    .headline{font-size:2.2rem;line-height:1.05;font-weight:800;margin:0 0 12px}
+    .sub{color:rgba(230,238,246,0.78);margin-bottom:18px}
+    .cta-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+    .counter{margin-top:14px;color:rgba(230,238,246,0.7);font-weight:600}
+    /* 3D preview placeholder */
+    .preview{height:420px;border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2));box-shadow:0 12px 40px rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .preview .card{width:220px;height:140px;border-radius:12px;background:#0b1220;box-shadow:0 10px 30px rgba(0,0,0,0.6);transform:translateY(0);transition:transform .25s ease, box-shadow .25s ease}
+    .preview .card:hover{transform:translateY(-6px);box-shadow:0 22px 50px rgba(0,0,0,0.7)}
+    .mute-toggle{position:absolute;top:12px;right:12px;padding:8px;border-radius:8px;background:var(--glass);backdrop-filter:blur(6px);cursor:pointer}
+    /* features */
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+    .feat{padding:16px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.06));box-shadow:0 8px 20px rgba(0,0,0,0.45);transition:transform .25s ease}
+    .feat:hover{transform:translateY(-6px)}
+    .feat .icon{font-size:1.4rem;margin-bottom:10px}
+    /* live stats */
+    .live-stats{margin-top:24px;padding:12px;border-radius:12px;background:linear-gradient(90deg,#ff6b6b22,#1f6feb22,#7a5cff22);display:flex;gap:18px;align-items:center;justify-content:space-between}
+    .stats-item{font-weight:700}
+    /* testimonials */
+    .testimonials{margin-top:36px}
+    .carousel{display:flex;gap:12px;overflow:hidden;padding:8px}
+    .tcard{min-width:320px;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));transform-origin:center center;transition:transform .6s ease}
+    /* footer */
+    footer{margin-top:48px;padding:28px 0;border-top:1px solid rgba(255,255,255,0.02)}
+    .footer-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+    .link{color:inherit;text-decoration:none}
+    .link:hover{filter:brightness(1.1);text-shadow:0 0 8px rgba(255,100,100,0.08)}
+    /* smoke canvas placeholder */
+    .smoke-canvas{position:absolute;inset:0;pointer-events:none;opacity:0.35}
+    /* custom cursor */
+    .custom-cursor{position:fixed;left:0;top:0;width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,80,80,0.9);transform:translate(-50%,-50%);pointer-events:none;mix-blend-mode:screen;transition:transform .12s ease, width .12s ease, height .12s ease}
+
+    /* Fade-in for page load */
+    .fade-in { opacity: 0; transform: translateY(6px); transition: opacity .6s ease, transform .6s ease; }
+    .fade-in.show { opacity: 1; transform: translateY(0); }
+
+    /* Particles (glowing dots) */
+    .particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0.1));
+      border-radius: 50%;
+      filter: blur(6px);
+      opacity: 0.9;
+      mix-blend-mode: screen;
+      animation: float var(--dur) linear infinite;
+      box-shadow: 0 0 12px rgba(255,255,255,0.06), 0 0 22px var(--glow);
+    }
+    @keyframes float {
+      0% { transform: translateY(0) translateX(0) scale(1); }
+      50% { transform: translateY(-60px) translateX(var(--dx)) scale(.9); }
+      100% { transform: translateY(0) translateX(0) scale(1); }
+    }
+
+    /* Soft smoke overlay already present on canvas; make sure it's subtle */
+    .smoke-canvas { opacity: .28; filter: blur(1px); }
+
+    /* Hero micro interactions */
+    .btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 14px 40px rgba(255,60,60,0.08); }
+    .preview .card { transition: transform .25s ease, box-shadow .25s ease; }
+    .preview .card:hover { transform: translateY(-6px) rotate(-1deg); box-shadow: 0 30px 70px rgba(0,0,0,0.65); }
+
+    /* Cursor reduced motion safety */
+    @media (prefers-reduced-motion: reduce) {
+      .particle { animation: none; }
+    }
+
+    /* ensure particles sit behind UI but above background */
+    .particles { z-index: 3; }
+    header, main, footer { position: relative; z-index: 10; }
+    /* responsive */
+    @media (max-width:1000px){
+      .hero{grid-template-columns:1fr 1fr}
+      .preview{height:360px}
+      .features{grid-template-columns:1fr}
+      .container{padding:0 12px}
+    }
+    @media (max-width:600px){
+      .hero{grid-template-columns:1fr;min-height:72vh;padding:22px 0}
+      .preview{height:260px}
+      .nav{display:none} /* simple burger could be added */
+    }
+    /* reduced motion */
+    @media (prefers-reduced-motion:reduce){
+      *{transition:none!important;animation:none!important}
+    }
+
+    /* Replace .brand and .mask to be slightly brighter */
+.brand{display:flex;gap:10px;align-items:center;font-weight:700;font-size:1.1rem;
+  background:linear-gradient(90deg,#ff6b6b,#ffd369);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* subtle brighter mask background */
+.mask{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(90deg,#7a1a1a,#2b0b0b);
+  display:flex;align-items:center;justify-content:center;
+  color:#ffe89e;font-weight:800;cursor:pointer;
+}
+
+/* Paused badge style */
+.badge.paused{
+  display:inline-block;
+  margin-left:8px;
+  padding:4px 8px;
+  font-size:12px;
+  font-weight:700;
+  color:#0b1220;
+  background:#ffd369;
+  border-radius:999px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.25);
+}
+
+/* Footer — dark-green Chess.com-style */
+.site-footer{
+  margin-top:48px;
+  background:linear-gradient(180deg,#07121a,#061018);
+  border-top:3px solid rgba(31,111,235,0.06);
+  box-shadow:0 -6px 40px rgba(0,0,0,0.6) inset;
+  color:rgba(230,238,246,0.92);
+  position:relative;
+  overflow:hidden;
+  padding:36px 18px;
+}
+.site-footer .container{max-width:1300px;margin:0 auto;display:flex;gap:24px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.footer-brand{display:flex;flex-direction:column;gap:8px}
+.footer-brand .logo{font-weight:800;background:linear-gradient(90deg,#ffb86b,#ffd369);-webkit-background-clip:text;color:transparent;font-size:1.05rem}
+.footer-tag{font-size:0.95rem;color:rgba(230,238,246,0.7)}
+.footer-links{display:flex;gap:22px;flex-wrap:wrap}
+.footer-links ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.footer-links a{color:inherit;text-decoration:none;opacity:0.92;position:relative;padding-bottom:2px;transition:opacity .18s, transform .12s}
+.footer-links a:hover{opacity:1;transform:translateY(-2px)}
+.footer-links a::after{content:"";position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--neon),var(--accent));bottom:0;transform:scaleX(0);transform-origin:left;transition:transform .18s}
+.footer-links a:hover::after{transform:scaleX(1)}
+.footer-socials{display:flex;gap:12px;align-items:center}
+.footer-socials a{width:36px;height:36px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);transition:transform .12s,box-shadow .12s}
+.footer-socials a:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(31,111,235,0.06)}
+.footer-bottom{margin-top:18px;border-top:1px solid rgba(255,255,255,0.02);padding-top:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;color:rgba(230,238,246,0.6);font-size:13px}
+.footer-particles{position:absolute;left:0;right:0;top:-28px;height:40px;pointer-events:none;z-index:0;overflow:hidden}
+.footer-particles .p{position:absolute;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.06);filter:blur(6px);opacity:.9}
+@media(max-width:800px){
+  .site-footer .container{flex-direction:column;align-items:flex-start;gap:14px}
+  .footer-bottom{flex-direction:column;align-items:flex-start;gap:8px}
+}
+
+/* header auth/profile styles */
+.auth-area{display:flex;align-items:center;gap:10px}
+.profile{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:10px;background:linear-gradient(90deg,rgba(255,255,255,0.02),rgba(0,0,0,0.04));border:1px solid rgba(255,255,255,0.03);cursor:default;transform:translateY(-6px);opacity:0;transition:transform .28s cubic-bezier(.2,.9,.3,1),opacity .28s}
+.profile.show{transform:translateY(0);opacity:1}
+.profile-avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(90deg,#ffd369,#ff6b6b);color:#07121a;display:flex;align-items:center;justify-content:center;font-weight:800}
+.profile-info{display:flex;flex-direction:column;line-height:1}
+.profile-info .name{font-weight:700;font-size:.95rem}
+.profile-info .lvl{font-size:12px;color:rgba(230,238,246,0.7)}
+.settings-btn{padding:6px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+
+/* hide auth-only links by default; JS will toggle */
+.auth-only{display:none}
+
+/* small responsive tweak */
+@media(max-width:600px){ .profile-info{display:none} .profile-avatar{width:32px;height:32px} }
+
+/* Notifications dropdown styles */
+#notifDropdown {
+  display: none;
+  position: fixed;
+  right: 18px;
+  top: 74px;
+  width: 320px;
+  max-height: 420px;
+  overflow: auto;
+  background: #0b1220;
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  border-radius: 10px;
+  padding: 8px;
+  z-index: 250;
+}
+#notifDropdown div {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#notifDropdown div:last-child {
+  border-bottom: none;
+}
+#notifDropdown .small {
+  color: rgba(230,238,246,0.7);
+}
+#notifDropdown .btn-ghost {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+#notifDropdown .btn-ghost.mark {
+  color: rgba(31,111,235,0.9);
+}
+#notifDropdown .btn-ghost.del {
+  color: #ff6b6b;
+}
+
+/* Adjusted toast styles for consistency */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: #e6eef6;
+  padding: 12px 18px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  font-size: 14px;
+  display: none;
+  z-index: 1000;
+}
+#toast.show {
+  display: block;
+}
+
+/* Media query adjustments for notifications */
+@media (max-width: 600px) {
+  #notifDropdown {
+    width: calc(100% - 32px);
+    right: 16px;
+    top: 64px;
+  }
+}
+  </style>
+</head>
+<body>
+  <!-- add particles container -->
+  <div class="particles" id="particles" aria-hidden="true"></div>
+
+  <header class="topbar" role="banner">
+    <div class="topbar-inner">
+      <div style="display:flex;align-items:center;gap:18px">
+        <div id="maskLogo" class="mask" title="Mafia mask">M</div>
+        <div class="brand">MafiaArena</div>
+        <nav class="nav" role="navigation" aria-label="Main navigation">
+          <a href="index.html" class="fade-in">Home</a>
+          <a href="play.html" class="fade-in auth-only">Play</a>
+          <a href="leaderboard.html" class="fade-in">Leaderboard</a>
+          <a href="store.html" class="fade-in auth-only">Store</a>
+          <a href="friends.html" class="fade-in auth-only">Friends</a> <!-- ADDED: appears only when logged in -->
+        </nav>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px">
+        <!-- Notification bell (auth-aware; shown regardless but badge only when notifications exist) -->
+        <div id="notifWrap" style="position:relative;">
+          <button id="notifBtn" class="btn-ghost" aria-haspopup="true" aria-expanded="false" title="Notifications" style="padding:8px;border-radius:10px;">
+            🔔 <span id="notifBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ff6b6b;color:#07121a;padding:4px 6px;border-radius:999px;font-weight:800;font-size:12px"></span>
+          </button>
+        </div>
+
+        <!-- auth area: shows login/register when not authed; profile when authed -->
+        <div id="authArea" class="auth-area">
+          <!-- default: login/register buttons (visible when not authed) -->
+          <div id="authButtons">
+            <a id="loginBtn" class="btn btn-outline" href="login.html">Login</a>
+            <a id="registerBtn" class="btn btn-primary" href="register.html">Register</a>
+          </div>
+
+          <!-- profile widget (hidden until authed) -->
+          <div id="profileWidget" class="profile" aria-hidden="true" role="group" aria-label="User profile">
+            <div class="profile-avatar" id="profileAvatar">D</div>
+            <div class="profile-info" id="profileInfo">
+              <div class="name" id="profileName">Player</div>
+              <div class="lvl" id="profileLevel">Lv. 1</div>
+            </div>
+            <button id="profileSettings" class="settings-btn" title="Settings" aria-label="Open settings">⚙️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero fade-in" role="region" aria-labelledby="heroTitle">
+      <div class="hero-left">
+        <h1 id="heroTitle" class="headline"><span id="typed">Play. Deceive. Survive.</span></h1>
+        <p class="sub">Join fast matchmaking, private rooms and monthly tournaments. Strategy, bluffing and real-time voting — all in.</p>
+
+        <div class="cta-row">
+          <!-- Play Now CTA -->
+          <a id="playNow" class="btn btn-primary fade-in" href="play.html" role="button" aria-label="Play Now">Play Now</a>
+          <button id="learnBtn" class="btn btn-outline fade-in">Learn How to Play</button>
+        </div>
+
+        <div class="counter fade-in" aria-live="polite"> <span id="playerCount">12,584</span> players online</div>
+
+        <div class="features" aria-hidden="false">
+          <div class="feat" title="Real-time gameplay">
+            <div class="icon">⚡</div>
+            <div class="h4">Real-Time Gameplay</div>
+            <div class="muted">Instant server connection and live voting animations.</div>
+          </div>
+
+          <div class="feat" title="Play with friends">
+            <div class="icon">👥</div>
+            <div class="h4">Play with Friends</div>
+            <div class="muted">Invite and voice-chat with your crew in private rooms.</div>
+            <div class="muted" style="margin-top:8px;font-size:.9rem">Hover to reveal Telegram invite (demo)</div>
+          </div>
+
+          <!-- Tournaments now shows Paused badge -->
+          <div class="feat" title="Tournaments">
+            <div style="display:flex;align-items:center;gap:8px">
+      <div class="icon">🏆</div>
+      <div class="h4">Tournaments<span class="badge paused" aria-hidden="true">Paused</span></div>
+    </div>
+    <div class="muted">Tournaments are temporarily paused. Check back later for schedule updates.</div>
+          </div>
+        </div>
+
+        <div class="live-stats" role="status" aria-live="polite">
+          <div class="stats-item">Active games: <span id="activeGames"></span></div>
+          <div class="stats-item">Total users: <span id="totalUsers"></span></div>
+          <div class="stats-item">Next tournament: <strong id="nextTour">Paused</strong></div>
+        </div>
+
+        <div class="testimonials">
+          <h3>What players say</h3>
+          <div class="carousel" id="carousel">
+            <div class="tcard"> <strong>Alice</strong><p class="muted">“I found my best friends in Mafia Online.”</p></div>
+            <div class="tcard"> <strong>Leo</strong><p class="muted">“Fast matches, great community.”</p></div>
+            <div class="tcard"> <strong>Sara</strong><p class="muted">“The tournaments are intense and rewarding.”</p></div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="preview fade-in" aria-hidden="false" role="img" aria-label="3D mafia table preview">
+        <div class="mute-toggle" id="musicToggle" title="Toggle background music">🔊</div>
+
+        <!-- 3D style illustration placeholder (CSS shapes + animated smoke) -->
+        <div id="threeFallback" style="text-align:center;color:rgba(230,238,246,0.7);position:relative;">
+          <svg width="360" height="220" viewBox="0 0 360 220" aria-hidden="true" focusable="false">
+            <!-- simple stylized round table + silhouettes -->
+            <ellipse cx="180" cy="130" rx="140" ry="40" fill="#07121a" opacity="0.9"></ellipse>
+            <circle cx="90" cy="70" r="26" fill="#0b1220" stroke="#1f6feb22" stroke-width="2"></circle>
+            <circle cx="180" cy="54" r="26" fill="#0b1220" stroke="#1f6feb22" stroke-width="2"></circle>
+            <circle cx="270" cy="70" r="26" fill="#0b1220" stroke="#1f6feb22" stroke-width="2"></circle>
+            <!-- tile of cards -->
+            <rect x="150" y="90" rx="6" ry="6" width="60" height="36" fill="#0b1220" stroke="#ffd36922" />
+            <rect x="166" y="82" rx="6" ry="6" width="60" height="36" fill="#0b1220" stroke="#ff8a5b22" transform="rotate(-8 166 82)"/>
+          </svg>
+
+          <div class="card" aria-hidden="true" style="display:inline-block;margin-top:8px">[Card stack visual]</div>
+
+          <!-- smoke canvas sits above to create subtle animated smoke -->
+          <canvas class="smoke-canvas" id="smokeCanvas" width="480" height="260" style="position:absolute;left:0;top:0;"></canvas>
+        </div>
+      </aside>
+    </section>
+
+    <!-- add stats panel near top of main content -->
+
+
+    <footer class="site-footer" role="contentinfo" aria-label="Site footer">
+    <div class="footer-particles" id="footerParticles" aria-hidden="true"></div>
+
+    <div class="container">
+      <div class="footer-brand" style="z-index:2">
+        <div class="logo">MafiaArena — Play. Deceive. Win.</div>
+        <div class="footer-tag">Join live matches, bluff your way to the top.</div>
+      </div>
+
+      <div class="footer-links" style="z-index:2">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="play.html">Play</a></li>
+          <li><a href="store.html">Store</a></li>
+        </ul>
+        <ul>
+          <li><a href="leaderboard.html">Leaderboard</a></li>
+          <li><a href="friends.html">Friends</a></li>
+          <li><a href="settings.html">Settings</a></li>
+        </ul>
+      </div>
+
+      <div style="z-index:2;display:flex;flex-direction:column;gap:10px;align-items:flex-end">
+        <div class="footer-socials" aria-label="Social links">
+          <a href="#" title="Telegram" aria-label="Telegram">✈️</a>
+          <a href="#" title="Discord" aria-label="Discord">💬</a>
+          <a href="#" title="YouTube" aria-label="YouTube">▶️</a>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="font-weight:700">© 2025 MafiaArena</div>
+          <div class="muted">| Built by CardinalX Be</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom" style="z-index:2">
+      <div class="muted">MafiaArena — Play. Deceive. Win.</div>
+      <div class="muted">All rights reserved.</div>
+    </div>
+  </footer>
+  </main>
+
+  <!-- particles are generated into this container -->
+  <!-- custom cursor -->
+  <div id="cursor" class="custom-cursor" aria-hidden="true"></div>
+
+  <!-- notifications dropdown (insert near body end) -->
+  <div id="notifDropdown" style="display:none;position:fixed;right:18px;top:74px;width:320px;max-height:420px;overflow:auto;background:#0b1220;border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 60px rgba(0,0,0,0.6);border-radius:10px;padding:8px;z-index:250" aria-hidden="true"></div>
+
+  <script>
+    // Minimal interactions: typing effect, fake socket counter, music toggle, mouselight, carousel, easter egg
+    (function(){
+      // Typewriter + glow (simple)
+      const txt = "Play. Deceive. Survive.";
+      const el = document.getElementById('typed');
+      let i = 0;
+      function typeTick(){
+        if(!el) return;
+        el.textContent = txt.slice(0, i);
+        i++;
+        if(i <= txt.length) setTimeout(typeTick, 45);
+        else {
+          // glow pulse
+          el.animate([{filter:'drop-shadow(0 0 0 rgba(255,70,70,0))'},{filter:'drop-shadow(0 0 18px rgba(255,70,70,0.28))'},{filter:'drop-shadow(0 0 0 rgba(255,70,70,0))'}],{duration:2000,iterations:Infinity})
+        }
+      }
+      if(window.matchMedia('(prefers-reduced-motion:reduce)').matches) { el.textContent = txt; } else { typeTick(); }
+
+      // Fake WebSocket player counter (replace with real Socket.IO hook)
+      const playerCount = document.getElementById('playerCount');
+      let base = 12584;
+      setInterval(()=> {
+        base += Math.floor(Math.random()*6 - 2);
+        if(base < 1000) base = 12584;
+        if(playerCount) playerCount.textContent = base.toLocaleString();
+      }, 2500);
+
+      // fetch /api/stats stub (replace with real API)
+      function refreshStats(){
+        // example: fetch('/api/stats').then(...) — here we simulate
+        document.getElementById('activeGames').textContent = Math.floor(200 + Math.random()*60);
+        document.getElementById('totalUsers').textContent = (50000 + Math.floor(Math.random()*300)).toLocaleString();
+      }
+      refreshStats();
+      setInterval(refreshStats, 8000);
+
+      // Music toggle (lightweight: audio not auto-play)
+      let musicOn = false;
+      const musicToggle = document.getElementById('musicToggle');
+      const audio = new Audio(); // leave src unset: integrate real music via config
+      audio.loop = true;
+      musicToggle.addEventListener('click', ()=> {
+        if(!musicOn){
+          // audio.src = 'assets/ambience.mp3'; audio.play();
+          musicOn = true; musicToggle.textContent = '🔊';
+          showToast('Music: ON (demo)');
+        } else {
+          // audio.pause();
+          musicOn = false; musicToggle.textContent = '🔈';
+          showToast('Music: OFF');
+        }
+      });
+
+      // toast helper (reuses existing toast div)
+      function showToast(msg, t=1800){
+        const toast = document.getElementById('toast');
+        if(!toast) return;
+        toast.textContent = msg; toast.classList.add('show'); toast.setAttribute('aria-hidden','false');
+        clearTimeout(showToast._t); showToast._t = setTimeout(()=>{ toast.classList.remove('show'); toast.setAttribute('aria-hidden','true'); }, t);
+      }
+
+      // custom cursor
+      const cursor = document.getElementById('cursor');
+      document.addEventListener('mousemove', e => {
+        if(cursor) cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+        // move background light by setting CSS variables
+        document.documentElement.style.setProperty('--mx', (e.clientX / window.innerWidth).toFixed(2));
+        document.documentElement.style.setProperty('--my', (e.clientY / window.innerHeight).toFixed(2));
+      });
+
+      // carousel auto-slide
+      const carousel = document.getElementById('carousel');
+      if(carousel){
+        let offset = 0;
+        setInterval(()=> {
+          offset += 1;
+          const cards = carousel.children;
+          carousel.appendChild(cards[0].cloneNode(true));
+          carousel.removeChild(cards[0]);
+        }, 5000);
+      }
+
+      // Easter egg: click mask 5x to trigger secret animation
+      const mask = document.getElementById('maskLogo');
+      let clicks=0, last=0;
+      if(mask) mask.addEventListener('click', ()=>{
+        const now = Date.now();
+        if(now - last > 4000) clicks = 0; last = now;
+        clicks++;
+        if(clicks >= 5){
+          clicks = 0;
+          showToast('Secret unlocked: 3D piano demo (placeholder)');
+          // Here you'd lazy-load Three.js scene for the piano animation
+        }
+      });
+
+      // Accessibility: keyboard focus visual
+      document.addEventListener('keydown', (e)=>{
+        if(e.key === 'Tab') document.body.classList.add('user-tab-focus');
+      });
+
+      // Prefetch heavy visuals on user interaction
+      document.addEventListener('pointerdown', ()=> {
+        // optional: lazy-load three.js bundle / Lottie here
+      }, {once:true});
+
+      // simple ARIA: announce hero
+      setTimeout(()=> {
+        const hero = document.getElementById('heroTitle');
+        if(hero) hero.setAttribute('aria-live','polite');
+      }, 1200);
+
+      // show fade-in elements
+      window.addEventListener('load', ()=> {
+        document.querySelectorAll('.fade-in').forEach((el,i)=> {
+          setTimeout(()=> el.classList.add('show'), 80 * i);
+        });
+      });
+
+      // Generate simple glowing particles
+      const particles = document.getElementById('particles');
+      if(particles){
+        const count = Math.max(16, Math.floor(window.innerWidth / 60));
+        for(let i=0;i<count;i++){
+          const p = document.createElement('div');
+          p.className = 'particle';
+          const size = 4 + Math.random()*8;
+          p.style.width = `${size}px`; p.style.height = `${size}px`;
+          const x = Math.random()*100; const y = Math.random()*100;
+          p.style.left = `${x}%`; p.style.top = `${y}%`;
+          p.style.setProperty('--dx', `${(Math.random()*30-15)|0}px`);
+          p.style.setProperty('--dur', `${6 + Math.random()*8}s`);
+          // glow color minimal variance: greenish/blueish tint for mafia vibe
+          p.style.setProperty('--glow', Math.random() > .6 ? 'rgba(31,111,235,0.28)' : 'rgba(0,191,166,0.22)');
+          particles.appendChild(p);
+        }
+      }
+
+      // basic smoke canvas animation (subtle sine waves)
+      const canvas = document.getElementById('smokeCanvas');
+      if(canvas){
+        const ctx = canvas.getContext('2d');
+        let t = 0;
+        function drawSmoke(){
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          for(let i=0;i<4;i++){
+            ctx.beginPath();
+            const y = canvas.height * 0.5 + Math.sin(t*0.6 + i) * 8 * (i+1);
+            ctx.ellipse(canvas.width*0.5, y, 160 - i*22, 30 + i*8, 0, 0, Math.PI*2);
+            ctx.fillStyle = `rgba(255,255,255,${0.02 + i*0.01})`;
+            ctx.fill();
+          }
+          t += 0.02;
+          requestAnimationFrame(drawSmoke);
+        }
+        drawSmoke();
+      }
+    })();
+  </script>
+
+  <script src="js/app.js"></script>
+
+  <!-- small script: footer particles -->
+  <script>
+    (function(){
+      const container = document.getElementById('footerParticles');
+      if(!container) return;
+      const count = 18;
+      for(let i=0;i<count;i++){
+        const p = document.createElement('div');
+        p.className = 'p';
+        const size = 2 + Math.random()*6;
+        p.style.width = p.style.height = size + 'px';
+        p.style.left = (Math.random()*100) + '%';
+        p.style.top = (Math.random()*100) + '%';
+        p.style.opacity = 0.06 + Math.random()*0.7;
+        container.appendChild(p);
+        // animate slowly
+        const dur = 8000 + Math.random()*12000;
+        const dx = (Math.random()*40 - 20);
+        p.animate([
+          { transform: 'translate3d(0,0,0)' },
+          { transform: `translate3d(${dx}px,-12px,0)` },
+          { transform: 'translate3d(0,0,0)' }
+        ], { duration: dur, iterations: Infinity, easing: 'ease-in-out', delay: Math.random()*1000 });
+      }
+    })();
+  </script>
+
+  <!-- Auth-aware header updater: reads localStorage 'mafiaUser' and toggles header UI -->
+<script>
+/* filepath: c:\Users\Acer\Desktop\mafia\frontend\index.html */
+/* Auth & Navigation helper (exposes NavAuth global) */
+(function(){
+  const KEY = 'mafiaUser';
+
+  function readUser(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
+  function isLogged(){ return !!readUser(); }
+
+  function showAuthLinksStagger(){
+    const authEls = Array.from(document.querySelectorAll('.auth-only'));
+    // quick guard
+    if(!authEls.length) return;
+    // small "expand" animation
+    const nav = document.querySelector('.topbar-inner') || document.querySelector('.topbar');
+    if(nav){ nav.style.transition = 'transform .4s ease'; nav.style.transform = 'scale(1.01)'; setTimeout(()=> nav.style.transform = '', 420); }
+
+    // stagger reveal
+    authEls.forEach((el,i)=>{
+      el.style.display = 'inline-flex';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(6px)';
+      setTimeout(()=>{
+        el.style.transition = 'opacity .28s, transform .28s';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, 80 * i);
+    });
+  }
+
+  function hideAuthLinks(){
+    const authEls = Array.from(document.querySelectorAll('.auth-only'));
+    authEls.forEach(el => { el.style.display = 'none'; el.style.opacity=''; el.style.transform=''; el.style.transition=''; });
+  }
+
+  function populateProfile(user){
+    const authButtons = document.getElementById('authButtons');
+    const profileWidget = document.getElementById('profileWidget');
+    const avatarEl = document.getElementById('profileAvatar');
+    const nameEl = document.getElementById('profileName');
+    const lvlEl = document.getElementById('profileLevel');
+
+    if(authButtons) authButtons.style.display = 'none';
+    if(profileWidget){
+      avatarEl.textContent = (user.avatar || (user.name||'U').charAt(0)).toUpperCase();
+      nameEl.textContent = user.name || 'Player';
+      lvlEl.textContent = 'Lv. ' + (user.level || 1);
+      profileWidget.setAttribute('aria-hidden','false');
+      // show with animate
+      requestAnimationFrame(()=> profileWidget.classList.add('show'));
+      // attach dropdown
+      attachSettingsDropdown();
+    }
+  }
+
+  function clearProfile(){
+    const authButtons = document.getElementById('authButtons');
+    const profileWidget = document.getElementById('profileWidget');
+    if(authButtons) authButtons.style.display = '';
+    if(profileWidget){
+      profileWidget.classList.remove('show');
+      profileWidget.setAttribute('aria-hidden','true');
+    }
+    // hide auth links
+    hideAuthLinks();
+  }
+
+  // settings dropdown creation (single instance)
+  function attachSettingsDropdown(){
+    if(document.getElementById('settingsDropdown')) return;
+    const btn = document.getElementById('profileSettings');
+    if(!btn) return;
+    const dd = document.createElement('div');
+    dd.id = 'settingsDropdown';
+    dd.style.position = 'absolute';
+    dd.style.right = '18px';
+    dd.style.top = '68px';
+    dd.style.background = '#0b1220';
+    dd.style.border = '1px solid rgba(255,255,255,0.03)';
+    dd.style.padding = '8px';
+    dd.style.borderRadius = '10px';
+    dd.style.boxShadow = '0 12px 40px rgba(0,0,0,0.6)';
+    dd.style.display = 'none';
+    dd.style.zIndex = 200;
+    dd.innerHTML = `
+      <button class="btn btn-ghost" data-action="profile" style="display:block;width:100%;text-align:left;padding:8px;border:0;background:transparent">Profile</button>
+      <button class="btn btn-ghost" data-action="edit" style="display:block;width:100%;text-align:left;padding:8px;border:0;background:transparent">Edit Info</button>
+      <button class="btn btn-ghost" data-action="logout" style="display:block;width:100%;text-align:left;padding:8px;border:0;background:transparent;color:#ff6b6b">Logout</button>
+    `;
+    document.body.appendChild(dd);
+
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+      // small fade
+      dd.style.opacity = '0'; dd.style.transition = 'opacity .18s ease'; requestAnimationFrame(()=> dd.style.opacity = '1');
+    });
+
+    dd.addEventListener('click', (e)=>{
+      const action = e.target.dataset.action;
+      if(action === 'profile'){ window.location.href='profile.html'; }
+      if(action === 'edit'){ window.location.href='profile.html#edit'; }
+      if(action === 'logout'){ localStorage.removeItem('mafiaUser'); // immediate UI change
+        clearProfile(); // animate out
+        // fade-out effect and redirect to home
+        document.body.style.transition = 'opacity .36s ease'; document.body.style.opacity = '0';
+        setTimeout(()=> window.location.href = 'index.html', 380);
+      }
+    });
+
+    // click outside to close
+    document.addEventListener('click', ()=> dd.style.display = 'none');
+  }
+
+  // Public functions for other pages
+  window.NavAuth = {
+    isLogged: isLogged,
+    requireAuth: function(featureName){
+      if(isLogged()) return true;
+      // attach message param and redirect to login
+      const msg = encodeURIComponent('Please log in to access ' + (featureName||'this section'));
+      window.location.href = 'login.html?msg=' + msg;
+      return false;
+    },
+    // animate reveal used after login
+    revealAuthLinks: showAuthLinksStagger
+  };
+
+  // initialize UI on load + storage sync
+  function initHeader(){
+    const user = readUser();
+    if(user){ populateProfile(user); showAuthLinksStagger(); }
+    else { clearProfile(); }
+    attachSettingsDropdown();
+  }
+
+  // respond to cross-tab login/logout
+  window.addEventListener('storage', (e)=>{
+    if(e.key === 'mafiaUser'){ initHeader(); }
+  });
+
+  document.addEventListener('DOMContentLoaded', initHeader);
+})();
+</script>
+
+<!-- Notifications manager (simple localStorage-backed) -->
+<script>
+(function(){
+  const KEY = 'mafia_notifications';
+  const btn = document.getElementById('notifBtn');
+  const badge = document.getElementById('notifBadge');
+  const dropdown = document.getElementById('notifDropdown');
+
+  function read(){ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ return []; } }
+  function write(list){ try{ localStorage.setItem(KEY, JSON.stringify(list)); }catch(e){} }
+
+  function unseenCount(list){
+    return list.filter(n=> !n.read).length;
+  }
+
+  function render(){
+    const items = read();
+    const count = unseenCount(items);
+    if(count>0){ badge.style.display='inline-flex'; badge.textContent = count; } else { badge.style.display='none'; }
+    // populate dropdown
+    dropdown.innerHTML = '';
+    if(!items.length){
+      dropdown.innerHTML = '<div class="small" style="padding:12px;color:rgba(230,238,246,0.7)">No notifications</div>';
+      return;
+    }
+    items.slice().reverse().forEach(n=>{
+      const el = document.createElement('div');
+      el.style.padding='10px'; el.style.borderBottom='1px solid rgba(255,255,255,0.02)';
+      el.style.display='flex'; el.style.alignItems='center'; el.style.gap='8px';
+      el.innerHTML = `<div style="flex:1">
+        <div style="font-weight:700">${escapeHtml(n.title||'Notification')}</div>
+        <div class="small" style="color:rgba(230,238,246,0.7)">${escapeHtml(n.text)}</div>
+        <div class="small" style="color:rgba(230,238,246,0.55);margin-top:6px">${new Date(n.ts).toLocaleString()}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="btn-ghost mark" data-id="${n.id}">Mark</button>
+        <button class="btn-ghost del" data-id="${n.id}">×</button>
+      </div>`;
+      if(!n.read){ el.style.background = 'linear-gradient(90deg,rgba(0,191,166,0.04),transparent)'; }
+      dropdown.appendChild(el);
+    });
+    // actions
+    dropdown.querySelectorAll('.mark').forEach(b=> b.addEventListener('click', (e)=>{
+      const id = b.dataset.id; const list = read();
+      const it = list.find(x=> String(x.id)===String(id)); if(it) it.read = true; write(list); render();
+    }));
+    dropdown.querySelectorAll('.del').forEach(b=> b.addEventListener('click', (e)=>{
+      const id = b.dataset.id; let list = read(); list = list.filter(x=> String(x.id)!==String(id)); write(list); render();
+    }));
+    // clear all
+    const clear = document.createElement('div'); clear.style.padding='8px'; clear.style.textAlign='center';
+    clear.innerHTML = `<button class="btn-ghost" id="clearAll">Clear all</button>`;
+    dropdown.appendChild(clear);
+    document.getElementById('clearAll').addEventListener('click', ()=> { write([]); render(); });
+  }
+
+  function addNotification(obj){
+    const list = read();
+    obj.id = obj.id || Date.now() + Math.floor(Math.random()*999);
+    obj.ts = obj.ts || Date.now();
+    obj.read = obj.read || false;
+    list.push(obj);
+    write(list);
+    // if dropdown visible, re-render; else update badge
+    render();
+  }
+
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // toggle dropdown
+  btn.addEventListener('click', (e)=>{
+    if(dropdown.style.display === 'none' || dropdown.style.display === ''){ dropdown.style.display='block'; dropdown.setAttribute('aria-hidden','false'); btn.setAttribute('aria-expanded','true'); render(); }
+    else { dropdown.style.display='none'; dropdown.setAttribute('aria-hidden','true'); btn.setAttribute('aria-expanded','false'); }
+  });
+  // close on outside click
+  document.addEventListener('click', (e)=> { if(!btn.contains(e.target) && !dropdown.contains(e.target)){ dropdown.style.display='none'; btn.setAttribute('aria-expanded','false'); }});
+  document.addEventListener('keydown', (e)=> { if(e.key==='Escape'){ dropdown.style.display='none'; btn.setAttribute('aria-expanded','false'); }});
+
+  // react to storage changes (other tabs/pages)
+  window.addEventListener('storage', (e)=> { if(e.key === KEY) render(); });
+
+  // expose API globally
+  window.MafiaNotifications = { add: addNotification, list: read, clearAll: ()=>{ write([]); render(); } };
+
+  // initial render
+  render();
+})();
+</script>
+<!-- Update stats: registered users (localStorage) and active games (API or localStorage) -->
+<script>
+(function(){
+  const usersEl = document.getElementById('totalUsersCount');
+  const gamesEl = document.getElementById('activeGamesCount');
+
+  function getLocalUsersCount(){
+    try{
+      const u = JSON.parse(localStorage.getItem('mafia_users') || '[]');
+      return Array.isArray(u) ? u.length : 0;
+    }catch(e){ return 0; }
+  }
+
+  async function getServerRoomsCount(){
+    try{
+      const res = await fetch('/api/rooms');
+      if(!res.ok) throw new Error('no api');
+      const list = await res.json();
+      return Array.isArray(list) ? list.length : 0;
+    }catch(e){
+      // fallback to localStorage key used in demo
+      try{
+        const r = JSON.parse(localStorage.getItem('mafia_rooms') || '[]');
+        return Array.isArray(r) ? r.length : 0;
+      }catch(_){ return 0; }
+    }
+  }
+
+  async function updateUsers(){
+    if(!usersEl) return;
+    const n = getLocalUsersCount();
+    usersEl.textContent = n.toLocaleString();
+  }
+
+  async function updateGames(){
+    if(!gamesEl) return;
+    const n = await getServerRoomsCount();
+    gamesEl.textContent = n.toLocaleString();
+  }
+
+  // initial
+  document.addEventListener('DOMContentLoaded', function(){
+    updateUsers();
+    updateGames();
+  });
+
+  // update when local storage changed in this or other tabs
+  window.addEventListener('storage', function(e){
+    if(!e) return;
+    if(e.key === 'mafia_users' || e.key === null) updateUsers();
+    if(e.key === 'mafia_rooms' || e.key === 'mafia_rooms_updated' || e.key === null) updateGames();
+    if(e.key === 'mafiaUser') updateUsers();
+  });
+
+  // if Socket.IO is available, listen for room events
+  if(window.io){
+    try{
+      const sock = io();
+      sock.on('roomCreated', ()=> updateGames());
+      sock.on('roomUpdated', ()=> updateGames());
+      sock.on('roomDeleted', ()=> updateGames && updateGames());
+    }catch(e){}
+  }
+
+  // expose for manual refresh if needed
+  window.updateLobbyStats = function(){ updateUsers(); updateGames(); };
+})();
+</script>
+</body>
+</html>
