@@ -78,6 +78,7 @@ async function connectMongoOrExit() {
   if (!MONGODB_URI) {
     console.error('FATAL: MONGODB_URI not set. Please set MONGODB_URI environment variable.');
     if (NODE_ENV === 'production') {
+      console.error('Please add MONGODB_URI to your Railway environment variables');
       process.exit(1);
     } else {
       console.warn('Running without database in development mode');
@@ -87,28 +88,74 @@ async function connectMongoOrExit() {
 
   try {
     console.log('Connecting to MongoDB...');
+    console.log('MongoDB URI format check:', MONGODB_URI.includes('mongodb+srv://') ? 'SRV' : 'Standard');
+    
     const clientOptions = {
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000, // Increased timeout
       socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
       tls: MONGODB_TLS_ALLOW_INVALID ? undefined : true,
-      tlsAllowInvalidCertificates: MONGODB_TLS_ALLOW_INVALID
+      tlsAllowInvalidCertificates: MONGODB_TLS_ALLOW_INVALID,
+      tlsAllowInvalidHostnames: MONGODB_TLS_ALLOW_INVALID,
+      retryWrites: true,
+      w: 'majority'
     };
 
+    // Add additional DNS options for Railway
+    if (NODE_ENV === 'production') {
+      clientOptions.serverSelectionTimeoutMS = 15000;
+      clientOptions.connectTimeoutMS = 15000;
+    }
+
     client = new MongoClient(MONGODB_URI, clientOptions);
+    
+    // Test connection with ping
     await client.connect();
+    await client.db().admin().ping();
+    
     const db = client.db();
     usersCol = db.collection('users');
     roomsCol = db.collection('rooms');
     
     // Create indexes
-    await usersCol.createIndex({ email: 1 }, { unique: true });
-    await roomsCol.createIndex({ id: 1 }, { unique: true });
+    await usersCol.createIndex({ email: 1 }, { unique: true }).catch(err => {
+      if (err.code !== 85) console.warn('Users index may already exist:', err.message);
+    });
+    await roomsCol.createIndex({ id: 1 }, { unique: true }).catch(err => {
+      if (err.code !== 85) console.warn('Rooms index may already exist:', err.message);
+    });
     
     console.log('✅ Connected to MongoDB:', db.databaseName || '(unknown)');
+    console.log('📊 Database collections ready');
   } catch (err) {
-    console.error('❌ Failed to connect to MongoDB:', err && err.message ? err.message : err);
+    console.error('❌ Failed to connect to MongoDB:');
+    console.error('Error Code:', err.code);
+    console.error('Error Message:', err.message);
+    
+    if (err.code === 'ENOTFOUND') {
+      console.error('🔍 DNS Resolution Failed - Possible solutions:');
+      console.error('1. Check MONGODB_URI format in Railway environment variables');
+      console.error('2. Ensure MongoDB Atlas allows Railway IP addresses (0.0.0.0/0)');
+      console.error('3. Verify cluster name and credentials are correct');
+      console.error('4. Try using standard MongoDB URI format instead of SRV');
+    } else if (err.code === 'ETIMEDOUT') {
+      console.error('⏰ Connection Timeout - Possible solutions:');
+      console.error('1. Check network connectivity');
+      console.error('2. Verify MongoDB Atlas cluster is running');
+      console.error('3. Check IP whitelist in MongoDB Atlas');
+    }
+    
     if (NODE_ENV === 'production') {
+      console.error('🚨 Production mode: Exiting due to database connection failure');
+      console.error('💡 To continue without database, set ALLOW_IN_MEMORY=true');
+      
+      // Check if we should continue without database
+      if (process.env.ALLOW_IN_MEMORY === 'true') {
+        console.warn('⚠️ Continuing without database (in-memory mode)');
+        return;
+      }
+      
       process.exit(1);
     } else {
       console.warn('⚠️ Running without database in development mode');
