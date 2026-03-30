@@ -6,112 +6,395 @@
 <title>Store — MafiaArena</title>
 <meta name="description" content="Buy avatars, skins, themes and power-ups in MafiaArena store." />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/global.css">
 <link rel="stylesheet" href="css/styles.css">
 <style>
-:root{--neon:#1F6FEB;--accent:#FFD369;--header-h:64px;--glass:rgba(255,255,255,0.03)}
-html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#071021,#0d1117 40%);color:#e6eef6}
-/* fixed header (ensure stable height) */
-.topbar{position:fixed;left:0;right:0;top:0;height:var(--header-h);display:flex;align-items:center;z-index:80;backdrop-filter:blur(8px);background:linear-gradient(180deg,rgba(7,18,33,0.6),rgba(7,18,33,0.35));border-bottom:1px solid rgba(255,255,255,0.02)}
-.topbar-inner{max-width:1300px;margin:0 auto;padding:0 18px;width:100%;display:flex;align-items:center;justify-content:space-between;height:var(--header-h)}
-.brand{font-weight:800;background:linear-gradient(90deg,#ffd369,#ff6b6b);-webkit-background-clip:text;background-clip:text;color:transparent}
-.btn{padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer;border:0}
-.btn-primary{background:linear-gradient(90deg,var(--neon),#00BFA6);color:#07121a}
-.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit}
-
-/* main pushed below header to avoid overlap */
-main{padding-top:calc(var(--header-h) + 20px);max-width:1300px;margin:0 auto;padding-left:18px;padding-right:18px;padding-bottom:48px}
-
-/* header row */
-.store-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-.title{font-size:1.6rem;font-weight:800}
-.controls{display:flex;gap:12px;align-items:center}
-
-/* coin counter */
-.coin-box{display:flex;align-items:center;gap:8px;background:var(--glass);padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.02)}
-.diamond-icon{width:28px;height:28px;border-radius:50%;background:linear-gradient(90deg,#6EE7FF,#1F6FEB);display:flex;align-items:center;justify-content:center;font-weight:800;color:#07121a}
-.coin-icon{width:28px;height:28px;border-radius:50%;background:linear-gradient(90deg,#FFD369,#FFB84D);display:flex;align-items:center;justify-content:center;font-weight:800;color:#07121a;animation:spin 2.5s linear infinite}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-
-/* grid */
-.store-grid{display:block;margin-top:8px}
-.main{max-width:980px;margin:0 auto}
-
-/* product cards */
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-@media(max-width:1100px){.cards{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:650px){.cards{grid-template-columns:1fr}}
-.card{background:linear-gradient(180deg,var(--glass),rgba(0,0,0,0.04));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);box-shadow:0 12px 40px rgba(0,0,0,0.6);position:relative;perspective:900px;overflow:visible}
-.card-inner{transition:transform .6s ease;transform-style:preserve-3d;min-height:160px;display:flex;flex-direction:column;justify-content:space-between}
-.card.flip .card-inner{transform:rotateY(180deg)}
-.card-front,.card-back{backface-visibility:hidden;border-radius:8px}
-.card-back{position:absolute;inset:0;padding:14px;transform:rotateY(180deg);display:flex;align-items:center;justify-content:center;flex-direction:column}
-.badge-purchased{
-  position:absolute;
-  top:12px;
-  right:12px;               /* moved from left -> right */
-  background:#00bfa6;
-  color:#07121a;
-  padding:6px 8px;
-  border-radius:999px;
-  font-weight:800;
-  display:none;
-  box-shadow:0 8px 24px rgba(0,191,166,0.08);
+/* Store specific styles */
+.store-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
 }
-/* show when purchased */
-.card.purchased .badge-purchased{ display:block; }
 
-/* buy button */
-.buy{padding:10px 12px;border-radius:10px;background:linear-gradient(90deg,#00d17a,#00bfa6);color:#07121a;font-weight:700;cursor:pointer;transition:transform .12s, box-shadow .12s}
-.buy:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,191,166,0.12)}
+.title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
 
-/* overlay for not logged in */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:220}
-.overlay .box{background:#0b1220;padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);text-align:center}
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
 
-/* modal & toast */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:230}
-.modal{background:#0b1220;padding:18px;border-radius:12px;width:100%;max-width:520px;border:1px solid rgba(255,255,255,0.04)}
-.toast{position:fixed;right:18px;bottom:18px;background:#00bfa6;color:#07121a;padding:12px 16px;border-radius:10px;display:none;z-index:240;font-weight:700}
+.select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--glass);
+  color: var(--text-primary);
+  min-height: 44px;
+  cursor: pointer;
+}
 
-/* background visuals */
-.bg-anim{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
-.bg-blob{position:absolute;border-radius:50%;filter:blur(120px) saturate(120%);opacity:0.08}
-.particles{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden}
-.particle{position:absolute;width:6px;height:6px;border-radius:50%;filter:blur(6px);mix-blend-mode:screen;opacity:.9;animation:float var(--dur) linear infinite}
-@keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-60px)}100%{transform:translateY(0)}}
-.smoke{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.28;filter:blur(1px)}
-.custom-cursor{position:fixed;left:0;top:0;width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,80,80,0.9);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;mix-blend-mode:screen;transition:transform .08s linear}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* Coin counter */
+.coin-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--glass);
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+}
+
+.diamond-icon, .coin-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: var(--bg-primary);
+}
+
+.diamond-icon {
+  background: linear-gradient(90deg, #6EE7FF, var(--primary-color));
+}
+
+.coin-icon {
+  background: linear-gradient(90deg, var(--accent-color), #FFB84D);
+  animation: spin 2.5s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Store grid */
+.store-grid {
+  display: block;
+  margin-top: 8px;
+}
+
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Tabs */
+.tab {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  background: var(--glass);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  min-height: 44px;
+}
+
+.tab-btn.active {
+  background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+  color: var(--bg-primary);
+}
+
+/* Product cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: linear-gradient(180deg, var(--glass), rgba(0, 0, 0, 0.1));
+  padding: 16px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+  position: relative;
+  transition: var(--transition);
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+.card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 160px;
+}
+
+.card-front {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-front .icon {
+  font-size: 2.5rem;
+  min-width: 48px;
+  text-align: center;
+}
+
+.card-front .info h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.card-front .info p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.price {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--accent-color);
+}
+
+.buy {
+  background: linear-gradient(90deg, var(--success-color), #00d17a);
+  color: var(--bg-primary);
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  min-height: 36px;
+}
+
+.buy:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 191, 166, 0.3);
+}
+
+.buy:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Badge */
+.badge-purchased {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--success-color);
+  color: var(--bg-primary);
+  padding: 6px 8px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.75rem;
+  display: none;
+  box-shadow: 0 4px 12px rgba(0, 191, 166, 0.3);
+}
+
+.card.purchased .badge-purchased {
+  display: block;
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: var(--bg-tertiary);
+  padding: 24px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal h3 {
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.modal .form-group {
+  margin-bottom: 16px;
+}
+
+.modal .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.modal .form-group input,
+.modal .form-group select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--glass);
+  color: var(--text-primary);
+}
+
+.modal .actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  background: var(--success-color);
+  color: var(--bg-primary);
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: none;
+  z-index: 1001;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.3s ease;
+}
+
+/* Loading state */
+.loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .store-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  
+  .controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .card {
+    padding: 12px;
+  }
+  
+  .card-front {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .card-footer {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  
+  .buy {
+    width: 100%;
+  }
+  
+  .modal {
+    margin: 0;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab {
+    flex-direction: column;
+  }
+  
+  .tab-btn {
+    min-height: 48px;
+  }
+  
+  .coin-box {
+    padding: 6px 10px;
+  }
+  
+  .diamond-icon, .coin-icon {
+    width: 24px;
+    height: 24px;
+  }
+}
 </style>
 </head>
 <body>
-  <!-- ...existing code... -->
-  <div class="bg-anim" aria-hidden="true">
-    <div class="bg-blob" style="width:520px;height:520px;left:-80px;top:8%;background:radial-gradient(circle,#1F6FEB,#00BFA6)"></div>
-    <div class="bg-blob" style="width:420px;height:420px;right:-100px;top:30%;background:radial-gradient(circle,#FFD369,#FF8A5B)"></div>
-  </div>
-
-  <div class="particles" id="particles" aria-hidden="true"></div>
-  <canvas id="smoke" class="smoke" width="1600" height="900" aria-hidden="true"></canvas>
-  <div id="cursor" class="custom-cursor" aria-hidden="true"></div>
-
   <header class="topbar" role="banner">
     <div class="topbar-inner">
       <div style="display:flex;align-items:center;gap:18px">
-        <div class="brand">MafiaArena Store</div>
-        <!-- added navigation links -->
-        <nav class="nav" aria-label="Main navigation" style="display:flex;gap:12px;align-items:center">
-          <a href="index.html" class="btn-ghost" style="padding:6px 10px;border-radius:8px;text-decoration:none">Home</a>
-          <a href="play.html" class="btn-ghost" style="padding:6px 10px;border-radius:8px;text-decoration:none">Play</a>
-          <a href="howto.html" class="btn-ghost" style="padding:6px 10px;border-radius:8px;text-decoration:none">How to Play</a>
+        <a href="index.html" class="brand">MafiaArena Store</a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <nav class="nav" id="mainNav" aria-label="Main navigation">
+          <a href="index.html">Home</a>
+          <a href="play.html">Play</a>
+          <a href="howto.html">How to Play</a>
         </nav>
       </div>
 
       <div style="display:flex;align-items:center;gap:12px">
         <div class="coin-box" aria-hidden="true">
-          <div class="diamond-icon" id="diamondIcon">◆</div>
+          <div class="diamond-icon">◆</div>
           <div id="diamondCount">0</div>
-          <div class="coin-icon" id="coinIcon">¢</div>
+          <div class="coin-icon">¢</div>
           <div id="coinCount">1,240</div>
         </div>
         <button id="topUpBtn" class="btn btn-primary">Top Up</button>
@@ -120,35 +403,40 @@ main{padding-top:calc(var(--header-h) + 20px);max-width:1300px;margin:0 auto;pad
   </header>
 
   <main>
-    <div class="store-head">
-      <div class="title">Explore items</div>
-      <div class="controls">
-        <select id="filter" class="select">
-          <option value="all">All categories</option>
-        </select>
-        <select id="sort" class="select">
-          <option value="pop">Sort: Popularity</option>
-          <option value="low">Price: Low→High</option>
-          <option value="high">Price: High→Low</option>
-        </select>
+    <div class="container">
+      <div class="store-head">
+        <h1 class="title">Explore items</h1>
+        <div class="controls">
+          <select id="filter" class="select">
+            <option value="all">All categories</option>
+          </select>
+          <select id="sort" class="select">
+            <option value="pop">Sort: Popularity</option>
+            <option value="low">Price: Low→High</option>
+            <option value="high">Price: High→Low</option>
+          </select>
+        </div>
       </div>
-    </div>
 
-    <div class="store-grid">
-      <section class="main">
-        <div class="tab" style="margin-bottom:12px">
-          <button class="tab-btn active" data-tab="store" style="color: white;">Store</button>
-          <button class="tab-btn" data-tab="owned" style="color: white;">My Items</button>
-        </div>
+      <div class="store-grid">
+        <section class="main">
+          <div class="tab">
+            <button class="tab-btn active" data-tab="store">Store</button>
+            <button class="tab-btn" data-tab="owned">My Items</button>
+          </div>
 
-        <div id="storeView">
-          <div class="cards" id="cards"></div>
-        </div>
+          <div id="storeView">
+            <div class="cards" id="cards"></div>
+          </div>
 
-        <div id="ownedView" style="display:none">
-          <div class="card"><h4>Owned items</h4><div class="owned" id="ownedList"></div></div>
-        </div>
-      </section>
+          <div id="ownedView" style="display:none">
+            <div class="card">
+              <h3>Owned items</h3>
+              <div class="owned" id="ownedList"></div>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   </main>
 
@@ -156,29 +444,33 @@ main{padding-top:calc(var(--header-h) + 20px);max-width:1300px;margin:0 auto;pad
   <div id="topUpModal" class="modal-backdrop" aria-hidden="true">
     <div class="modal">
       <h3>Top Up Coins</h3>
-      <div style="margin-top:8px">
-        <label>Amount</label>
-        <input id="topAmount" class="select" type="number" min="100" value="500" />
+      <div class="form-group">
+        <label for="topAmount">Amount</label>
+        <input id="topAmount" type="number" min="100" value="500" />
       </div>
-      <div style="margin-top:8px">
-        <label>Payment method</label>
-        <select id="payMethod" class="select">
-          <option>PayPal</option><option>Card</option><option>Crypto</option>
+      <div class="form-group">
+        <label for="payMethod">Payment method</label>
+        <select id="payMethod">
+          <option>PayPal</option>
+          <option>Card</option>
+          <option>Crypto</option>
         </select>
       </div>
-      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
-        <button id="cancelTop" class="btn">Cancel</button>
+      <div class="actions">
+        <button id="cancelTop" class="btn btn-secondary">Cancel</button>
         <button id="confirmTop" class="btn btn-primary">Confirm</button>
       </div>
     </div>
   </div>
 
   <!-- Login overlay -->
-  <div id="loginOverlay" class="overlay" aria-hidden="true">
-    <div class="box">
+  <div id="loginOverlay" class="modal-backdrop" aria-hidden="true">
+    <div class="modal">
       <h3>Please log in to access the Store</h3>
-      <p class="muted">You must be signed in to buy items.</p>
-      <div style="margin-top:12px"><a href="login.html" class="btn btn-primary">Login</a></div>
+      <p class="text-secondary">You must be signed in to buy items.</p>
+      <div style="margin-top:16px">
+        <a href="login.html" class="btn btn-primary">Login</a>
+      </div>
     </div>
   </div>
 
@@ -190,26 +482,28 @@ main{padding-top:calc(var(--header-h) + 20px);max-width:1300px;margin:0 auto;pad
 
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  try{
-    if(window.NavAuth && !window.NavAuth.isLogged()){
-      const msg = encodeURIComponent('Please log in to access the Store');
-      window.location.href = 'login.html?msg=' + msg;
-      return;
-    }
-    // if authed, reveal auth elements in header (in case user returned)
-    if(window.NavAuth) window.NavAuth.revealAuthLinks();
-    // load user balance from localStorage if present
-    const user = JSON.parse(localStorage.getItem('mafiaUser') || 'null');
-    if(user){
-      // optionally display user.name or avatar in store header
-      const el = document.getElementById('balance');
-      if(el) el.textContent = el.textContent || '1,000'; // leave existing logic
-    }
-  }catch(e){}
-});
+  // Check authentication
+  const token = localStorage.getItem('mafiaToken');
+  const user = JSON.parse(localStorage.getItem('mafiaUser') || 'null');
+  
+  if (!token || !user) {
+    const loginOverlay = document.getElementById('loginOverlay');
+    loginOverlay.style.display = 'flex';
+    loginOverlay.setAttribute('aria-hidden', 'false');
+    return;
+  }
 
-document.addEventListener('DOMContentLoaded', ()=> {
-  // Mock items & state
+  // Mobile menu toggle
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const mainNav = document.getElementById('mainNav');
+  
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', () => {
+      mainNav.style.display = mainNav.style.display === 'flex' ? 'none' : 'flex';
+    });
+  }
+
+  // Store functionality
   const items = [
     {id:1,cat:'avatars',title:'Masked Avenger',desc:'Stylish avatar with mask',price:150,icon:'😎'},
     {id:2,cat:'skins',title:'Red Elegance',desc:'Mafia role skin',price:300,icon:'🕴️'},
@@ -217,128 +511,183 @@ document.addEventListener('DOMContentLoaded', ()=> {
     {id:4,cat:'powerups',title:'Second Chance',desc:'Revive once per game',price:500,icon:'🔁'},
     {id:5,cat:'sounds',title:'Retro Pack',desc:'Sound effects pack',price:120,icon:'🔊'}
   ];
+  
   let owned = [];
   let balance = 1240;
-  const isLoggedIn = true; // toggle to false to show overlay
-
-  const cardsEl = document.getElementById('cards'), ownedList = document.getElementById('ownedList'), balanceEl = document.getElementById('balance'), coinCount = document.getElementById('coinCount'), toast = document.getElementById('toast');
-  const clickSound = document.getElementById('clickSound'), ambient = document.getElementById('ambient');
-
-  // login overlay
-  const loginOverlay = document.getElementById('loginOverlay');
-  if(!isLoggedIn){ loginOverlay.style.display = 'flex'; loginOverlay.setAttribute('aria-hidden','false'); }
+  const cardsEl = document.getElementById('cards');
+  const ownedList = document.getElementById('ownedList');
+  const coinCount = document.getElementById('coinCount');
+  const toast = document.getElementById('toast');
+  const clickSound = document.getElementById('clickSound');
 
   function renderItems(list){
     cardsEl.innerHTML = '';
-    list.forEach(it=>{
-      const card = document.createElement('div'); card.className='card'; card.dataset.id = it.id;
+    list.forEach(item => {
+      const isPurchased = owned.some(o => o.id === item.id);
+      const card = document.createElement('div');
+      card.className = `card ${isPurchased ? 'purchased' : ''}`;
+      card.dataset.id = item.id;
+      
       card.innerHTML = `
         <div class="badge-purchased">Purchased!</div>
         <div class="card-inner">
           <div class="card-front">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div style="font-size:32px">${it.icon}</div>
-              <div>
-                <div style="font-weight:800">${it.title}</div>
-                <div class="muted small">${it.desc}</div>
-              </div>
+            <div class="icon">${item.icon}</div>
+            <div class="info">
+              <h3>${item.title}</h3>
+              <p>${item.desc}</p>
             </div>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
-            <div style="font-weight:800">${it.price} Coins</div>
-            <div><button class="buy">Buy</button></div>
+          <div class="card-footer">
+            <div class="price">${item.price} Coins</div>
+            <button class="buy" ${isPurchased ? 'disabled' : ''}>
+              ${isPurchased ? 'Owned' : 'Buy'}
+            </button>
           </div>
         </div>
-        <div class="card-back">
-          <div style="font-weight:800">Purchased!</div>
-          <div class="muted small">This item is now in your inventory.</div>
-        </div>
       `;
-      card.querySelector('.buy').addEventListener('click', ()=> {
-        if(!isLoggedIn){ loginOverlay.style.display='flex'; loginOverlay.setAttribute('aria-hidden','false'); return; }
-        if(balance < it.price){ alert('Not enough coins'); return; }
-        try{ clickSound.currentTime = 0; clickSound.play(); }catch(e){}
-        // deduct and mark purchased
-        balance -= it.price; balanceEl.textContent = balance; coinCount.textContent = balance;
-        card.classList.add('purchased'); // show badge
-        // replace Buy button with Owned (disabled) — no flip animation
-        const btn = card.querySelector('.buy');
-        btn.textContent = 'Owned';
-        btn.disabled = true;
-        btn.style.cursor = 'default';
-        // add to owned
-        owned.push(Object.assign({}, it));
-        showToast('Purchased!');
-        renderOwned();
-      });
+      
+      const buyBtn = card.querySelector('.buy');
+      if (!isPurchased && buyBtn) {
+        buyBtn.addEventListener('click', () => purchaseItem(item));
+      }
+      
       cardsEl.appendChild(card);
     });
   }
 
+  function purchaseItem(item) {
+    if (balance < item.price) {
+      showToast('Not enough coins!');
+      return;
+    }
+    
+    try {
+      clickSound.currentTime = 0;
+      clickSound.play();
+    } catch(e) {}
+    
+    balance -= item.price;
+    coinCount.textContent = balance;
+    
+    owned.push({...item});
+    showToast('Purchased!');
+    renderItems(items);
+    renderOwned();
+  }
+
   function renderOwned(){
     ownedList.innerHTML = '';
-    owned.forEach(o=>{
-      const el = document.createElement('div'); el.className='row';
-      el.innerHTML = `<div><strong>${o.title}</strong><div class="muted small">${o.desc}</div></div>
-        <div><button class="btn" data-id="${o.id}" data-action="equip">Equip</button> <button class="btn" data-id="${o.id}" data-action="unequip">Unequip</button></div>`;
+    if (owned.length === 0) {
+      ownedList.innerHTML = '<p class="text-secondary">No items owned yet</p>';
+      return;
+    }
+    
+    owned.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'flex justify-between items-center p-3 border-b';
+      el.innerHTML = `
+        <div>
+          <strong>${item.title}</strong>
+          <div class="text-sm text-secondary">${item.desc}</div>
+        </div>
+        <div>
+          <button class="btn btn-secondary btn-sm" data-id="${item.id}" data-action="equip">Equip</button>
+        </div>
+      `;
       ownedList.appendChild(el);
     });
-    ownedList.querySelectorAll('button').forEach(b=> b.addEventListener('click', ()=> showToast(b.dataset.action === 'equip' ? 'Equipped' : 'Unequipped')));
+    
+    ownedList.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showToast(btn.dataset.action === 'equip' ? 'Equipped' : 'Unequipped');
+      });
+    });
   }
 
-  function showToast(msg='Done'){ toast.textContent = msg; toast.style.display = 'block'; setTimeout(()=> toast.style.display = 'none', 1800); }
-  renderItems(items); renderOwned();
-  balanceEl.textContent = balance; coinCount.textContent = balance;
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(() => {
+      toast.style.display = 'none';
+    }, 2000);
+  }
 
-  // filter/sort
-  document.getElementById('filter').addEventListener('change', (e)=> {
-    const v = e.target.value; let list = items.slice();
-    if(v !== 'all') list = list.filter(i => i.cat === v);
+  // Filter and sort
+  document.getElementById('filter').addEventListener('change', (e) => {
+    const filter = e.target.value;
+    let list = items.slice();
+    if (filter !== 'all') {
+      list = list.filter(i => i.cat === filter);
+    }
     renderItems(list);
   });
-  document.getElementById('sort').addEventListener('change', (e)=> {
-    const v = e.target.value; let list = items.slice();
-    if(v === 'low') list.sort((a,b)=>a.price-b.price);
-    if(v === 'high') list.sort((a,b)=>b.price-a.price);
+
+  document.getElementById('sort').addEventListener('change', (e) => {
+    const sort = e.target.value;
+    let list = items.slice();
+    if (sort === 'low') list.sort((a,b) => a.price - b.price);
+    if (sort === 'high') list.sort((a,b) => b.price - a.price);
     renderItems(list);
   });
 
-  // tab switch
-  document.querySelectorAll('.tab-btn').forEach(btn=> btn.addEventListener('click', ()=> {
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
-    if(btn.dataset.tab === 'store'){ document.getElementById('storeView').style.display='block'; document.getElementById('ownedView').style.display='none'; }
-    else { document.getElementById('storeView').style.display='none'; document.getElementById('ownedView').style.display='block'; }
-  }));
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      const tab = btn.dataset.tab;
+      if (tab === 'store') {
+        document.getElementById('storeView').style.display = 'block';
+        document.getElementById('ownedView').style.display = 'none';
+      } else {
+        document.getElementById('storeView').style.display = 'none';
+        document.getElementById('ownedView').style.display = 'block';
+        renderOwned();
+      }
+    });
+  });
 
-  // top up modal logic
+  // Top up modal
   const topUpModal = document.getElementById('topUpModal');
-  document.getElementById('topUpBtn').addEventListener('click', ()=> topUpModal.style.display='flex');
-  document.getElementById('topUpBtn2').addEventListener('click', ()=> topUpModal.style.display='flex');
-  document.getElementById('cancelTop').addEventListener('click', ()=> topUpModal.style.display='none');
-  document.getElementById('confirmTop').addEventListener('click', ()=> {
-    const amt = parseInt(document.getElementById('topAmount').value||0); if(amt<=0){ alert('Enter an amount'); return; }
-    balance += amt; balanceEl.textContent = balance; coinCount.textContent = balance; topUpModal.style.display='none'; showToast('Top up successful');
+  document.getElementById('topUpBtn').addEventListener('click', () => {
+    topUpModal.style.display = 'flex';
+    topUpModal.setAttribute('aria-hidden', 'false');
+  });
+  
+  document.getElementById('cancelTop').addEventListener('click', () => {
+    topUpModal.style.display = 'none';
+    topUpModal.setAttribute('aria-hidden', 'true');
+  });
+  
+  document.getElementById('confirmTop').addEventListener('click', () => {
+    const amount = parseInt(document.getElementById('topAmount').value || 0);
+    if (amount <= 0) {
+      showToast('Enter a valid amount');
+      return;
+    }
+    
+    balance += amount;
+    coinCount.textContent = balance;
+    topUpModal.style.display = 'none';
+    topUpModal.setAttribute('aria-hidden', 'true');
+    showToast('Top up successful!');
   });
 
-  // login overlay behaviour: (clicking login navigates)
-  // ambient sound (optional)
-  try{ ambient.volume = 0.12; /* ambient.play(); */ }catch(e){}
+  // Close modals on backdrop click
+  document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) {
+        backdrop.style.display = 'none';
+        backdrop.setAttribute('aria-hidden', 'true');
+      }
+    });
+  });
 
-  // visuals: particles, smoke, cursor
-  const prefersReduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  const particlesEl = document.getElementById('particles');
-  if(particlesEl && !prefersReduced){
-    const count = Math.max(10, Math.floor(window.innerWidth/90));
-    for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='particle'; const s=3+Math.random()*8; d.style.width=d.style.height=s+'px'; d.style.left=(Math.random()*100)+'%'; d.style.top=(Math.random()*100)+'%'; d.style.setProperty('--dur',(6+Math.random()*8)+'s'); particlesEl.appendChild(d); }
-  }
-  const canvas = document.getElementById('smoke');
-  if(canvas && !prefersReduced){
-    const ctx = canvas.getContext('2d'); let t=0; (function loop(){ ctx.clearRect(0,0,canvas.width,canvas.height); for(let i=0;i<4;i++){ ctx.beginPath(); const y = canvas.height*0.5 + Math.sin(t*0.4 + i)*12*(i+1); ctx.ellipse(canvas.width*0.5,y,canvas.width*0.45 - i*80,30 + i*8,0,0,Math.PI*2); ctx.fillStyle = `rgba(255,255,255,${0.006 + i*0.007})`; ctx.fill(); } t+=0.01; requestAnimationFrame(loop); })();
-  }
-  const cursor = document.getElementById('cursor'); if(cursor) document.addEventListener('mousemove', e=> cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`);
-
-  // play click sound on buy
-  document.body.addEventListener('click', (e)=> { if(e.target.closest('.buy')){ try{ clickSound.currentTime=0; clickSound.play(); }catch(e){} } });
+  // Initialize
+  renderItems(items);
+  coinCount.textContent = balance;
 });
 </script>
 </body>
