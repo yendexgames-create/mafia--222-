@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Game Room — MafiaArena</title>
+<meta name="description" content="Play Mafia game in real-time" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/global.css">
+<style>
+/* Game room specific styles */
+.game-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--bg-primary), var(--bg-secondary));
+  display: flex;
+  flex-direction: column;
+}
+
+.game-header {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+}
+
+.game-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  gap: 20px;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.players-panel {
+  background: linear-gradient(180deg, var(--glass), rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  height: fit-content;
+}
+
+.game-area {
+  background: linear-gradient(180deg, var(--glass), rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+}
+
+.chat-panel {
+  background: linear-gradient(180deg, var(--glass), rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  max-height: 600px;
+}
+
+.panel-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.player-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--border-radius-sm);
+  margin-bottom: 8px;
+  background: var(--glass);
+  transition: var(--transition);
+}
+
+.player-item:hover {
+  background: var(--glass-hover);
+}
+
+.player-item.dead {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.player-item.eliminated {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid var(--danger-color);
+}
+
+.player-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--bg-primary);
+}
+
+.player-info {
+  flex: 1;
+}
+
+.player-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.player-status {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.player-role {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--glass);
+  color: var(--text-secondary);
+}
+
+.game-status {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.status-phase {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.status-timer {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.status-description {
+  color: var(--text-secondary);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.game-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 12px 24px;
+  border-radius: var(--border-radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  min-height: 44px;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.start-btn {
+  background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+  color: var(--bg-primary);
+}
+
+.start-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 191, 166, 0.3);
+}
+
+.vote-btn {
+  background: linear-gradient(90deg, var(--warning-color), var(--danger-color));
+  color: var(--bg-primary);
+}
+
+.leave-btn {
+  background: var(--glass);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.leave-btn:hover {
+  background: var(--glass-hover);
+  border-color: var(--border-hover);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--glass);
+  border-radius: var(--border-radius-sm);
+  max-height: 400px;
+}
+
+.chat-message {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-tertiary);
+}
+
+.chat-message.system {
+  background: rgba(31, 111, 235, 0.1);
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  font-style: italic;
+}
+
+.chat-author {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+}
+
+.chat-text {
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.chat-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+.chat-form {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background: var(--glass);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.chat-send {
+  padding: 10px 16px;
+  background: var(--primary-color);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.chat-send:hover {
+  background: var(--accent-color);
+}
+
+.room-info {
+  background: var(--glass);
+  padding: 16px;
+  border-radius: var(--border-radius-sm);
+  margin-bottom: 20px;
+}
+
+.room-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.room-details {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 1024px) {
+  .game-main {
+    grid-template-columns: 250px 1fr;
+    gap: 16px;
+  }
+  
+  .chat-panel {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .game-main {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 12px;
+  }
+  
+  .players-panel {
+    order: 2;
+  }
+  
+  .game-area {
+    order: 1;
+    min-height: 400px;
+    padding: 16px;
+  }
+  
+  .status-phase {
+    font-size: 1.5rem;
+  }
+  
+  .game-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .action-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-container {
+    padding: 12px 0;
+  }
+  
+  .players-panel,
+  .game-area {
+    padding: 12px;
+  }
+  
+  .status-phase {
+    font-size: 1.2rem;
+  }
+  
+  .player-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .player-name {
+    font-size: 0.9rem;
+  }
+  
+  .player-status {
+    font-size: 0.8rem;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="game-container">
+    <header class="topbar game-header" role="banner">
+      <div class="container">
+        <div class="topbar-inner">
+          <div style="display:flex;align-items:center;gap:18px">
+            <a href="play.html" class="brand">
+              <div class="mask">🎭</div>
+              MafiaArena
+            </a>
+            <div class="room-info">
+              <div class="room-name" id="roomName">Loading...</div>
+              <div class="room-details">
+                <span id="roomPlayers">0</span> / <span id="roomSize">6</span> players
+              </div>
+            </div>
+          </div>
+          <nav class="nav" aria-label="Game navigation">
+            <button class="btn leave-btn" id="leaveBtn">Leave Room</button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="game-main">
+      <aside class="players-panel">
+        <h2 class="panel-title">Players</h2>
+        <ul class="player-list" id="playerList">
+          <!-- Players will be added here -->
+        </ul>
+      </aside>
+
+      <section class="game-area">
+        <div class="game-status">
+          <div class="status-phase" id="gamePhase">Waiting...</div>
+          <div class="status-timer" id="gameTimer">--:--</div>
+          <div class="status-description" id="gameDescription">
+            Waiting for players to join...
+          </div>
+        </div>
+
+        <div class="game-actions" id="gameActions">
+          <button class="action-btn start-btn" id="startBtn" style="display:none;">Start Game</button>
+          <button class="action-btn vote-btn" id="voteBtn" style="display:none;">Vote Player</button>
+        </div>
+      </section>
+
+      <aside class="chat-panel">
+        <h2 class="panel-title">Chat</h2>
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-message system">
+            Welcome to the game room!
+          </div>
+        </div>
+        <form class="chat-form" id="chatForm">
+          <input 
+            type="text" 
+            class="chat-input" 
+            id="chatInput" 
+            placeholder="Type a message..." 
+            maxlength="200"
+          />
+          <button type="submit" class="chat-send">Send</button>
+        </form>
+      </aside>
+    </main>
+  </div>
+
+<script>
+// Game state
+let gameState = {
+  roomId: null,
+  players: [],
+  phase: 'waiting', // waiting, night, day, voting
+  timer: null,
+  isHost: false,
+  currentUser: null,
+  socket: null
+};
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  checkAuth();
+  initializeGame();
+  setupEventListeners();
+});
+
+function checkAuth() {
+  const token = localStorage.getItem('mafiaToken');
+  const user = JSON.parse(localStorage.getItem('mafiaUser') || 'null');
+  
+  if (!token || !user) {
+    alert('Please login to join a game room');
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  gameState.currentUser = user;
+}
+
+function initializeGame() {
+  // Get room ID from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  gameState.roomId = urlParams.get('id');
+  
+  if (!gameState.roomId) {
+    alert('Invalid room ID');
+    window.location.href = 'play.html';
+    return;
+  }
+  
+  // Load room data
+  loadRoomData();
+  
+  // Initialize WebSocket connection
+  initializeSocket();
+  
+  // Update UI
+  updateRoomInfo();
+  updatePlayerList();
+}
+
+function loadRoomData() {
+  // Mock room data for now
+  const mockRoom = {
+    id: gameState.roomId,
+    name: `Room ${gameState.roomId}`,
+    size: 6,
+    players: [
+      { id: 1, name: gameState.currentUser.name || 'Player 1', role: 'unknown', alive: true },
+      { id: 2, name: 'Player 2', role: 'unknown', alive: true },
+      { id: 3, name: 'Player 3', role: 'unknown', alive: true }
+    ]
+  };
+  
+  gameState.players = mockRoom.players;
+  gameState.isHost = gameState.players[0].name === (gameState.currentUser.name || 'Player 1');
+  
+  document.getElementById('roomName').textContent = mockRoom.name;
+  document.getElementById('roomSize').textContent = mockRoom.size;
+  document.getElementById('roomPlayers').textContent = mockRoom.players.length;
+  
+  // Show start button if host
+  if (gameState.isHost) {
+    document.getElementById('startBtn').style.display = 'inline-block';
+  }
+}
+
+function initializeSocket() {
+  // Mock WebSocket connection
+  // In real implementation, this would connect to your Socket.IO server
+  console.log('Initializing WebSocket connection...');
+  
+  // Simulate receiving messages
+  setTimeout(() => {
+    addSystemMessage('Connected to game room');
+  }, 1000);
+}
+
+function setupEventListeners() {
+  // Leave room
+  document.getElementById('leaveBtn').addEventListener('click', leaveRoom);
+  
+  // Start game
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  
+  // Vote player
+  document.getElementById('voteBtn').addEventListener('click', votePlayer);
+  
+  // Chat form
+  document.getElementById('chatForm').addEventListener('submit', sendChatMessage);
+  
+  // Chat input (send on Enter)
+  document.getElementById('chatInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendChatMessage(e);
+    }
+  });
+}
+
+function leaveRoom() {
+  if (confirm('Are you sure you want to leave the game room?')) {
+    // In real implementation, this would notify the server
+    window.location.href = 'play.html';
+  }
+}
+
+function startGame() {
+  if (!gameState.isHost) {
+    alert('Only the host can start the game');
+    return;
+  }
+  
+  if (gameState.players.length < 3) {
+    alert('Need at least 3 players to start');
+    return;
+  }
+  
+  // Start the game
+  gameState.phase = 'night';
+  updateGameStatus();
+  
+  // Hide start button
+  document.getElementById('startBtn').style.display = 'none';
+  
+  addSystemMessage('Game started! Night phase begins...');
+  
+  // Simulate game phases
+  simulateGamePhases();
+}
+
+function votePlayer() {
+  // Mock voting - in real implementation, this would show player selection
+  alert('Voting feature coming soon!');
+}
+
+function sendChatMessage(e) {
+  e.preventDefault();
+  
+  const input = document.getElementById('chatInput');
+  const message = input.value.trim();
+  
+  if (!message) return;
+  
+  // Add message to chat
+  addChatMessage(gameState.currentUser.name || 'Anonymous', message);
+  
+  // Clear input
+  input.value = '';
+  
+  // In real implementation, this would send the message via WebSocket
+  console.log('Sending chat message:', message);
+}
+
+function updateRoomInfo() {
+  // Room info is updated in loadRoomData()
+}
+
+function updatePlayerList() {
+  const playerList = document.getElementById('playerList');
+  playerList.innerHTML = '';
+  
+  gameState.players.forEach(player => {
+    const li = document.createElement('li');
+    li.className = `player-item ${!player.alive ? 'dead' : ''}`;
+    
+    li.innerHTML = `
+      <div class="player-avatar">${player.name.charAt(0).toUpperCase()}</div>
+      <div class="player-info">
+        <div class="player-name">${player.name}</div>
+        <div class="player-status">${player.alive ? 'Alive' : 'Eliminated'}</div>
+      </div>
+      <div class="player-role">${player.role === 'unknown' ? '?' : player.role}</div>
+    `;
+    
+    playerList.appendChild(li);
+  });
+  
+  document.getElementById('roomPlayers').textContent = gameState.players.length;
+}
+
+function updateGameStatus() {
+  const phaseEl = document.getElementById('gamePhase');
+  const timerEl = document.getElementById('gameTimer');
+  const descEl = document.getElementById('gameDescription');
+  
+  switch (gameState.phase) {
+    case 'waiting':
+      phaseEl.textContent = 'Waiting for Players';
+      timerEl.textContent = '--:--';
+      descEl.textContent = 'Waiting for players to join...';
+      break;
+      
+    case 'night':
+      phaseEl.textContent = 'Night Phase';
+      timerEl.textContent = '01:30';
+      descEl.textContent = 'Mafia is choosing their victim... Close your eyes!';
+      break;
+      
+    case 'day':
+      phaseEl.textContent = 'Day Phase';
+      timerEl.textContent = '02:00';
+      descEl.textContent = 'Discuss and vote for who you think is mafia!';
+      break;
+      
+    case 'voting':
+      phaseEl.textContent = 'Voting Phase';
+      timerEl.textContent = '00:30';
+      descEl.textContent = 'Vote now! Choose who to eliminate.';
+      break;
+  }
+}
+
+function addChatMessage(author, text) {
+  const messagesContainer = document.getElementById('chatMessages');
+  const messageEl = document.createElement('div');
+  messageEl.className = 'chat-message';
+  
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  
+  messageEl.innerHTML = `
+    <div class="chat-author">
+      ${author}
+      <span class="chat-time">${time}</span>
+    </div>
+    <div class="chat-text">${text}</div>
+  `;
+  
+  messagesContainer.appendChild(messageEl);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function addSystemMessage(text) {
+  const messagesContainer = document.getElementById('chatMessages');
+  const messageEl = document.createElement('div');
+  messageEl.className = 'chat-message system';
+  messageEl.textContent = text;
+  
+  messagesContainer.appendChild(messageEl);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function simulateGamePhases() {
+  // Mock game phase simulation
+  setTimeout(() => {
+    gameState.phase = 'day';
+    updateGameStatus();
+    addSystemMessage('Day phase begins! Discuss and vote!');
+    document.getElementById('voteBtn').style.display = 'inline-block';
+  }, 5000);
+}
+
+// Simulate other players joining
+setTimeout(() => {
+  if (gameState.players.length < 6) {
+    const newPlayer = {
+      id: gameState.players.length + 1,
+      name: `Player ${gameState.players.length + 1}`,
+      role: 'unknown',
+      alive: true
+    };
+    gameState.players.push(newPlayer);
+    updatePlayerList();
+    addSystemMessage(`${newPlayer.name} joined the room`);
+  }
+}, 3000);
+</script>
+</body>
+</html>

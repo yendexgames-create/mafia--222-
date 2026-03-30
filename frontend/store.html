@@ -7,7 +7,6 @@
 <meta name="description" content="Buy avatars, skins, themes and power-ups in MafiaArena store." />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/global.css">
-<link rel="stylesheet" href="css/styles.css">
 <style>
 /* Store specific styles */
 .store-head {
@@ -476,10 +475,6 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite">Purchased!</div>
 
-  <!-- audio -->
-  <audio id="clickSound"><source src="assets/click.mp3" type="audio/mpeg"></audio>
-  <audio id="ambient" loop><source src="assets/ambient.mp3" type="audio/mpeg"></audio>
-
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   // Check authentication
@@ -518,7 +513,6 @@ document.addEventListener('DOMContentLoaded', function(){
   const ownedList = document.getElementById('ownedList');
   const coinCount = document.getElementById('coinCount');
   const toast = document.getElementById('toast');
-  const clickSound = document.getElementById('clickSound');
 
   function renderItems(list){
     cardsEl.innerHTML = '';
@@ -561,11 +555,6 @@ document.addEventListener('DOMContentLoaded', function(){
       showToast('Not enough coins!');
       return;
     }
-    
-    try {
-      clickSound.currentTime = 0;
-      clickSound.play();
-    } catch(e) {}
     
     balance -= item.price;
     coinCount.textContent = balance;

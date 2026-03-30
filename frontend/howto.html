@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>How to Play — MafiaArena</title>
+<meta name="description" content="Learn how to play Mafia game" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/global.css">
+<style>
+/* How to page specific styles */
+.howto-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background: linear-gradient(180deg, var(--bg-primary), var(--bg-secondary));
+  min-height: 100vh;
+}
+
+.howto-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.howto-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.howto-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.section {
+  margin-bottom: 48px;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-icon {
+  font-size: 2rem;
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.role-card {
+  background: linear-gradient(180deg, var(--glass), rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 24px;
+  transition: var(--transition);
+}
+
+.role-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.role-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.role-icon {
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--glass);
+}
+
+.role-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.role-team {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.role-description {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.mafia-team {
+  border-left: 4px solid var(--danger-color);
+}
+
+.civilian-team {
+  border-left: 4px solid var(--success-color);
+}
+
+.steps-list {
+  counter-reset: step-counter;
+  list-style: none;
+  padding: 0;
+}
+
+.step-item {
+  counter-increment: step-counter;
+  position: relative;
+  padding-left: 60px;
+  margin-bottom: 32px;
+  min-height: 50px;
+}
+
+.step-number {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+  color: var(--bg-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.step-content h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.step-content p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.tip-card {
+  background: linear-gradient(180deg, var(--glass), rgba(0, 0, 0, 0.05));
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 20px;
+  position: relative;
+}
+
+.tip-card::before {
+  content: '💡';
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  font-size: 1.5rem;
+  background: var(--bg-secondary);
+  padding: 0 8px;
+}
+
+.tip-text {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.rules-list {
+  background: linear-gradient(180deg, var(--glass), rgba(0, 0, 0, 0.05));
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 32px;
+}
+
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.rule-item:last-child {
+  margin-bottom: 0;
+}
+
+.rule-icon {
+  font-size: 1.2rem;
+  margin-top: 2px;
+}
+
+.rule-text {
+  flex: 1;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.cta-section {
+  text-align: center;
+  padding: 48px 20px;
+  background: linear-gradient(180deg, var(--glass), rgba(0, 0, 0, 0.1));
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  margin-top: 48px;
+}
+
+.cta-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.cta-description {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .howto-container {
+    padding: 20px 12px;
+  }
+  
+  .howto-title {
+    font-size: 2rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .roles-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .step-item {
+    padding-left: 50px;
+  }
+  
+  .step-number {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+  
+  .tips-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .rules-list {
+    padding: 20px;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+</style>
+</head>
+<body>
+  <header class="topbar" role="banner">
+    <div class="container">
+      <div class="topbar-inner">
+        <div style="display:flex;align-items:center;gap:18px">
+          <a href="index.html" class="brand">
+            <div class="mask">🎭</div>
+            MafiaArena
+          </a>
+        </div>
+        <nav class="nav" aria-label="Main navigation">
+          <a href="index.html">Home</a>
+          <a href="play.html">Play</a>
+          <a href="store.html">Store</a>
+          <a href="#" class="btn btn-primary">Login</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="howto-container">
+    <div class="howto-header">
+      <h1 class="howto-title">How to Play Mafia</h1>
+      <p class="howto-subtitle">Master the art of deception and deduction in this classic social deduction game</p>
+    </div>
+
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-icon">🎭</span>
+        Game Roles
+      </h2>
+      
+      <div class="roles-grid">
+        <div class="role-card mafia-team">
+          <div class="role-header">
+            <div class="role-icon">🔫</div>
+            <div>
+              <div class="role-name">Mafia</div>
+              <div class="role-team">Evil Team</div>
+            </div>
+          </div>
+          <p class="role-description">
+            Eliminate civilians at night and blend in during the day. Win when mafia members equal or outnumber civilians.
+          </p>
+        </div>
+
+        <div class="role-card civilian-team">
+          <div class="role-header">
+            <div class="role-icon">👥</div>
+            <div>
+              <div class="role-name">Civilian</div>
+              <div class="role-team">Good Team</div>
+            </div>
+          </div>
+          <p class="role-description">
+            Help identify and vote out mafia members during the day. Win when all mafia members are eliminated.
+          </p>
+        </div>
+
+        <div class="role-card civilian-team">
+          <div class="role-header">
+            <div class="role-icon">🔍</div>
+            <div>
+              <div class="role-name">Detective</div>
+              <div class="role-team">Good Team</div>
+            </div>
+          </div>
+          <p class="role-description">
+            Special civilian who can investigate one player each night to learn if they are mafia or civilian.
+          </p>
+        </div>
+
+        <div class="role-card civilian-team">
+          <div class="role-header">
+            <div class="role-icon">👩‍⚕️</div>
+            <div>
+              <div class="role-name">Doctor</div>
+              <div class="role-team">Good Team</div>
+            </div>
+          </div>
+          <p class="role-description">
+            Special civilian who can protect one player each night from mafia attacks.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-icon">🎮</span>
+        How to Play
+      </h2>
+      
+      <ol class="steps-list">
+        <li class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Game Setup</h3>
+            <p>Players are secretly assigned roles. The game moderator announces who is mafia, civilian, detective, and doctor.</p>
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Night Phase</h3>
+            <p>All players close their eyes. Mafia secretly choose a civilian to eliminate. Then detective investigates a player, and doctor protects someone.</p>
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Day Phase</h3>
+            <p>Everyone opens their eyes. The moderator announces who was eliminated (if anyone). Players discuss and vote to eliminate someone.</p>
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>Voting</h3>
+            <p>Each player votes for who they think is mafia. The player with the most votes is eliminated and reveals their role.</p>
+          </div>
+        </li>
+
+        <li class="step-item">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <h3>Win Conditions</h3>
+            <p>Civilians win if all mafia are eliminated. Mafia win when they equal or outnumber the remaining civilians.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-icon">💡</span>
+        Pro Tips
+      </h2>
+      
+      <div class="tips-grid">
+        <div class="tip-card">
+          <p class="tip-text">As mafia, act like a civilian. Participate in discussions and help vote out other players to avoid suspicion.</p>
+        </div>
+
+        <div class="tip-card">
+          <p class="tip-text">Pay attention to voting patterns. Players who consistently vote with the mafia might be mafia themselves.</p>
+        </div>
+
+        <div class="tip-card">
+          <p class="tip-text">As detective, share your information carefully. Revealing your role too early makes you a mafia target.</p>
+        </div>
+
+        <div class="tip-card">
+          <p class="tip-text">Doctor, protect the detective or other key players. Sometimes protecting yourself is the right move.</p>
+        </div>
+
+        <div class="tip-card">
+          <p class="tip-text">Keep track of who defends whom. Mafia members often defend each other during voting.</p>
+        </div>
+
+        <div class="tip-card">
+          <p class="tip-text">Don't be afraid to change your mind. New information might reveal who the real mafia members are.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-icon">📋</span>
+        Game Rules
+      </h2>
+      
+      <div class="rules-list">
+        <div class="rule-item">
+          <span class="rule-icon">✅</span>
+          <p class="rule-text">Players must keep their eyes closed during night phases unless instructed to act.</p>
+        </div>
+
+        <div class="rule-item">
+          <span class="rule-icon">✅</span>
+          <p class="rule-text">No talking during night phase. All communication happens during day phase.</p>
+        </div>
+
+        <div class="rule-item">
+          <span class="rule-icon">✅</span>
+          <p class="rule-text">Dead players cannot communicate with living players about game information.</p>
+        </div>
+
+        <div class="rule-item">
+          <span class="rule-icon">✅</span>
+          <p class="rule-text">All players must participate in voting. Abstaining is not allowed.</p>
+        </div>
+
+        <div class="rule-item">
+          <span class="rule-icon">✅</span>
+          <p class="rule-text">The moderator's decisions are final. Players must follow instructions.</p>
+        </div>
+
+        <div class="rule-item">
+          <span class="rule-icon">✅</span>
+          <p class="rule-text">Have fun! It's just a game - don't take it too seriously or make personal attacks.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="cta-section">
+      <h2 class="cta-title">Ready to Play?</h2>
+      <p class="cta-description">Join thousands of players in exciting Mafia games. Test your deduction skills and become the ultimate survivor!</p>
+      <div class="cta-buttons">
+        <a href="play.html" class="btn btn-primary">Find a Game</a>
+        <a href="index.html" class="btn btn-outline">Back to Home</a>
+      </div>
+    </div>
+  </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Smooth scroll for any anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+
+  // Add animation to role cards on scroll
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, observerOptions);
+
+  // Observe all role cards and step items
+  document.querySelectorAll('.role-card, .step-item').forEach((el, index) => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+    observer.observe(el);
+  });
+});
+</script>
+</body>
+</html>

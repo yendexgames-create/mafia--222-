@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Play — MafiaArena</title>
+<meta name="description" content="Join or create Mafia game rooms" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/global.css">
+<style>
+/* Play page specific styles */
+.play-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--bg-primary), var(--bg-secondary));
+}
+
+.play-header {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.play-main {
+  padding: 40px 0;
+}
+
+.rooms-section {
+  margin-bottom: 40px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.create-room-btn {
+  background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+  color: var(--bg-primary);
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.create-room-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 191, 166, 0.3);
+}
+
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.room-card {
+  background: linear-gradient(180deg, var(--glass), rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 24px;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.room-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--primary-color);
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.room-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.room-host {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.room-lock {
+  width: 24px;
+  height: 24px;
+  color: var(--warning-color);
+}
+
+.room-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.room-players {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-count {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.player-max {
+  color: var(--text-secondary);
+}
+
+.room-size {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.room-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.join-btn {
+  flex: 1;
+  padding: 10px 16px;
+  background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+  color: var(--bg-primary);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.join-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+}
+
+.join-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spectate-btn {
+  padding: 10px 16px;
+  background: var(--glass);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.spectate-btn:hover {
+  background: var(--glass-hover);
+  border-color: var(--border-hover);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.empty-description {
+  margin-bottom: 24px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-color);
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 12px;
+}
+
+/* Modal styles */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: var(--bg-tertiary);
+  padding: 32px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  margin-bottom: 24px;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.modal-subtitle {
+  color: var(--text-secondary);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .rooms-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .room-card {
+    padding: 20px;
+  }
+  
+  .room-actions {
+    flex-direction: column;
+  }
+  
+  .join-btn,
+  .spectate-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .play-main {
+    padding: 20px 0;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .modal {
+    padding: 24px;
+    margin: 12px;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body>
+  <div class="play-container">
+    <header class="topbar play-header" role="banner">
+      <div class="container">
+        <div class="topbar-inner">
+          <div style="display:flex;align-items:center;gap:18px">
+            <a href="index.html" class="brand">
+              <div class="mask">🎭</div>
+              MafiaArena
+            </a>
+          </div>
+          <nav class="nav" aria-label="Main navigation">
+            <a href="index.html">Home</a>
+            <a href="store.html">Store</a>
+            <a href="#" id="userMenu" class="btn btn-primary">Login</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="play-main">
+      <div class="container">
+        <section class="rooms-section">
+          <div class="section-header">
+            <h1 class="section-title">Game Rooms</h1>
+            <button class="create-room-btn" id="createRoomBtn">+ Create Room</button>
+          </div>
+
+          <div id="roomsContainer">
+            <div class="loading">
+              <div class="spinner"></div>
+              <span>Loading rooms...</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create Room Modal -->
+  <div id="createRoomModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Create Game Room</h2>
+        <p class="modal-subtitle">Set up your Mafia game room</p>
+      </div>
+
+      <form id="createRoomForm">
+        <div class="form-group">
+          <label for="roomName">Room Name</label>
+          <input 
+            id="roomName" 
+            type="text" 
+            placeholder="Enter room name" 
+            required 
+            maxlength="30"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="roomSize">Max Players</label>
+          <select id="roomSize" required>
+            <option value="4">4 Players</option>
+            <option value="6" selected>6 Players</option>
+            <option value="8">8 Players</option>
+            <option value="10">10 Players</option>
+            <option value="12">12 Players</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="roomPassword">Password (Optional)</label>
+          <input 
+            id="roomPassword" 
+            type="password" 
+            placeholder="Leave empty for public room" 
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelCreate">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Room</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Join Room Modal -->
+  <div id="joinRoomModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Join Room</h2>
+        <p class="modal-subtitle" id="joinRoomName"></p>
+      </div>
+
+      <form id="joinRoomForm">
+        <div class="form-group">
+          <label for="playerName">Your Name</label>
+          <input 
+            id="playerName" 
+            type="text" 
+            placeholder="Enter your name" 
+            required 
+            maxlength="20"
+          />
+        </div>
+
+        <div class="form-group" id="passwordGroup" style="display:none;">
+          <label for="joinPassword">Room Password</label>
+          <input 
+            id="joinPassword" 
+            type="password" 
+            placeholder="Enter room password" 
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelJoin">Cancel</button>
+          <button type="submit" class="btn btn-primary">Join Room</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script>
+// API helper
+const api = {
+  async getRooms() {
+    const res = await fetch('/api/rooms');
+    return res.json();
+  },
+  
+  async createRoom(data) {
+    const res = await fetch('/api/rooms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return { ok: res.ok, body: await res.json() };
+  },
+  
+  async joinRoom(id, data) {
+    const res = await fetch(`/api/rooms/${id}/join`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return { ok: res.ok, body: await res.json() };
+  }
+};
+
+// State management
+let currentUser = null;
+let rooms = [];
+let currentJoinRoom = null;
+
+// DOM elements
+const roomsContainer = document.getElementById('roomsContainer');
+const createRoomBtn = document.getElementById('createRoomBtn');
+const createRoomModal = document.getElementById('createRoomModal');
+const joinRoomModal = document.getElementById('joinRoomModal');
+const userMenu = document.getElementById('userMenu');
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  checkAuth();
+  loadRooms();
+  setupEventListeners();
+});
+
+function checkAuth() {
+  const token = localStorage.getItem('mafiaToken');
+  const user = JSON.parse(localStorage.getItem('mafiaUser') || 'null');
+  
+  if (token && user) {
+    currentUser = user;
+    userMenu.textContent = user.name || user.email;
+    userMenu.href = '#';
+    userMenu.onclick = () => logout();
+  }
+}
+
+function logout() {
+  localStorage.removeItem('mafiaToken');
+  localStorage.removeItem('mafiaUser');
+  window.location.reload();
+}
+
+function setupEventListeners() {
+  createRoomBtn.addEventListener('click', showCreateModal);
+  
+  document.getElementById('cancelCreate').addEventListener('click', () => {
+    createRoomModal.style.display = 'none';
+    createRoomModal.setAttribute('aria-hidden', 'true');
+  });
+  
+  document.getElementById('cancelJoin').addEventListener('click', () => {
+    joinRoomModal.style.display = 'none';
+    joinRoomModal.setAttribute('aria-hidden', 'true');
+  });
+  
+  document.getElementById('createRoomForm').addEventListener('submit', handleCreateRoom);
+  document.getElementById('joinRoomForm').addEventListener('submit', handleJoinRoom);
+  
+  // Close modals on backdrop click
+  createRoomModal.addEventListener('click', (e) => {
+    if (e.target === createRoomModal) {
+      createRoomModal.style.display = 'none';
+      createRoomModal.setAttribute('aria-hidden', 'true');
+    }
+  });
+  
+  joinRoomModal.addEventListener('click', (e) => {
+    if (e.target === joinRoomModal) {
+      joinRoomModal.style.display = 'none';
+      joinRoomModal.setAttribute('aria-hidden', 'true');
+    }
+  });
+}
+
+async function loadRooms() {
+  try {
+    rooms = await api.getRooms();
+    renderRooms();
+  } catch (error) {
+    console.error('Failed to load rooms:', error);
+    roomsContainer.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-title">Failed to load rooms</div>
+        <div class="empty-description">Please check your connection and try again</div>
+        <button class="btn btn-primary" onclick="loadRooms()">Retry</button>
+      </div>
+    `;
+  }
+}
+
+function renderRooms() {
+  if (rooms.length === 0) {
+    roomsContainer.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🎭</div>
+        <div class="empty-title">No active rooms</div>
+        <div class="empty-description">Be the first to create a game room!</div>
+        <button class="btn btn-primary" onclick="showCreateModal()">Create Room</button>
+      </div>
+    `;
+    return;
+  }
+  
+  roomsContainer.innerHTML = `
+    <div class="rooms-grid">
+      ${rooms.map(room => createRoomCard(room)).join('')}
+    </div>
+  `;
+}
+
+function createRoomCard(room) {
+  const isFull = room.joined >= room.size;
+  const isLocked = room.locked;
+  const canJoin = !isFull && currentUser;
+  
+  return `
+    <div class="room-card" data-room-id="${room.id}">
+      <div class="room-header">
+        <div>
+          <div class="room-name">${room.name}</div>
+          <div class="room-host">Host: ${room.host || 'Unknown'}</div>
+        </div>
+        ${isLocked ? '<div class="room-lock">🔒</div>' : ''}
+      </div>
+      
+      <div class="room-info">
+        <div class="room-players">
+          <span class="player-count">${room.joined}</span>
+          <span class="player-max">/ ${room.size}</span>
+        </div>
+        <div class="room-size">${room.size} players max</div>
+      </div>
+      
+      <div class="room-actions">
+        <button class="join-btn" ${!canJoin ? 'disabled' : ''} 
+                onclick="handleJoinClick('${room.id}', ${isLocked})">
+          ${isFull ? 'Full' : (!currentUser ? 'Login to Join' : 'Join')}
+        </button>
+        <button class="spectate-btn">Spectate</button>
+      </div>
+    </div>
+  `;
+}
+
+function showCreateModal() {
+  if (!currentUser) {
+    alert('Please login to create a room');
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  createRoomModal.style.display = 'flex';
+  createRoomModal.setAttribute('aria-hidden', 'false');
+  document.getElementById('roomName').focus();
+}
+
+function handleJoinClick(roomId, isLocked) {
+  if (!currentUser) {
+    alert('Please login to join a room');
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  currentJoinRoom = rooms.find(r => r.id === roomId);
+  if (!currentJoinRoom) return;
+  
+  document.getElementById('joinRoomName').textContent = currentJoinRoom.name;
+  document.getElementById('passwordGroup').style.display = isLocked ? 'block' : 'none';
+  document.getElementById('playerName').value = currentUser.name || '';
+  
+  joinRoomModal.style.display = 'flex';
+  joinRoomModal.setAttribute('aria-hidden', 'false');
+  document.getElementById('playerName').focus();
+}
+
+async function handleCreateRoom(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const roomData = {
+    name: formData.get('roomName') || document.getElementById('roomName').value,
+    size: parseInt(formData.get('roomSize') || document.getElementById('roomSize').value),
+    password: formData.get('roomPassword') || document.getElementById('roomPassword').value,
+    host: currentUser.name || currentUser.email,
+    creatorName: currentUser.name || currentUser.email,
+    creatorId: currentUser.email || ('guest_' + Date.now())
+  };
+  
+  try {
+    const result = await api.createRoom(roomData);
+    if (result.ok) {
+      createRoomModal.style.display = 'none';
+      createRoomModal.setAttribute('aria-hidden', 'true');
+      // Redirect to game room
+      window.location.href = `game.html?id=${result.body.id}`;
+    } else {
+      alert(result.body.error || 'Failed to create room');
+    }
+  } catch (error) {
+    console.error('Create room error:', error);
+    alert('Failed to create room. Please try again.');
+  }
+}
+
+async function handleJoinRoom(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const joinData = {
+    name: formData.get('playerName') || document.getElementById('playerName').value,
+    password: formData.get('joinPassword') || document.getElementById('joinPassword').value,
+    creatorId: currentUser.email || ''
+  };
+  
+  try {
+    const result = await api.joinRoom(currentJoinRoom.id, joinData);
+    if (result.ok) {
+      joinRoomModal.style.display = 'none';
+      joinRoomModal.setAttribute('aria-hidden', 'false');
+      // Redirect to game room
+      window.location.href = `game.html?id=${currentJoinRoom.id}`;
+    } else {
+      alert(result.body.error || 'Failed to join room');
+    }
+  } catch (error) {
+    console.error('Join room error:', error);
+    alert('Failed to join room. Please try again.');
+  }
+}
+
+// Auto-refresh rooms every 30 seconds
+setInterval(loadRooms, 30000);
+</script>
+</body>
+</html>

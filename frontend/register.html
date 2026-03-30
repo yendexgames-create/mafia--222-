@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Register — MafiaArena</title>
+<meta name="description" content="Create your MafiaArena account" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/global.css">
+<style>
+/* Register specific styles */
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(180deg, var(--bg-primary), var(--bg-secondary));
+}
+
+.register-card {
+  width: 100%;
+  max-width: 480px;
+  background: linear-gradient(180deg, var(--glass), rgba(0, 0, 0, 0.1));
+  padding: 32px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.register-header h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.register-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--glass);
+  color: var(--text-primary);
+  font-size: 16px;
+  transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.2);
+}
+
+.register-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 20px;
+}
+
+.register-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(31, 111, 235, 0.3);
+}
+
+.register-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.divider {
+  text-align: center;
+  margin: 24px 0;
+  position: relative;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-color);
+}
+
+.divider span {
+  background: var(--bg-tertiary);
+  padding: 0 16px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.social-login {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--glass);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.social-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 24px;
+  color: var(--text-secondary);
+}
+
+.login-link a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-link a:hover {
+  color: var(--accent-color);
+}
+
+.error-message {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid var(--danger-color);
+  color: var(--danger-color);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  display: none;
+}
+
+.success-message {
+  background: rgba(0, 191, 166, 0.1);
+  border: 1px solid var(--success-color);
+  color: var(--success-color);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  display: none;
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .register-container {
+    padding: 12px;
+  }
+  
+  .register-card {
+    padding: 24px;
+  }
+  
+  .register-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="register-container">
+    <div class="register-card">
+      <div class="register-header">
+        <h2>Create Account</h2>
+        <p>Join the MafiaArena community</p>
+      </div>
+
+      <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message"></div>
+
+      <form id="registerForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fname">First Name</label>
+            <input 
+              id="fname" 
+              type="text" 
+              placeholder="Enter your first name" 
+              required 
+              autocomplete="given-name"
+            />
+          </div>
+          <div class="form-group">
+            <label for="lname">Last Name</label>
+            <input 
+              id="lname" 
+              type="text" 
+              placeholder="Enter your last name" 
+              required 
+              autocomplete="family-name"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input 
+            id="email" 
+            type="email" 
+            placeholder="Enter your email" 
+            required 
+            autocomplete="email"
+            inputmode="email"
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="country">Country</label>
+            <select id="country" required>
+              <option value="">Select country</option>
+              <option value="UZ">Uzbekistan</option>
+              <option value="US">United States</option>
+              <option value="GB">United Kingdom</option>
+              <option value="RU">Russia</option>
+              <option value="KZ">Kazakhstan</option>
+              <option value="TR">Turkey</option>
+              <option value="DE">Germany</option>
+              <option value="FR">France</option>
+              <option value="IT">Italy</option>
+              <option value="ES">Spain</option>
+              <option value="CN">China</option>
+              <option value="JP">Japan</option>
+              <option value="KR">South Korea</option>
+              <option value="IN">India</option>
+              <option value="PK">Pakistan</option>
+              <option value="AF">Afghanistan</option>
+              <option value="IR">Iran</option>
+              <option value="SA">Saudi Arabia</option>
+              <option value="AE">UAE</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" required>
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            id="password" 
+            type="password" 
+            placeholder="Create a password" 
+            required 
+            autocomplete="new-password"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input 
+            id="confirmPassword" 
+            type="password" 
+            placeholder="Confirm your password" 
+            required 
+            autocomplete="new-password"
+          />
+        </div>
+
+        <button type="submit" class="register-btn" id="registerBtn">
+          <span id="btnText">Create Account</span>
+        </button>
+      </form>
+
+      <div class="divider">
+        <span>OR</span>
+      </div>
+
+      <div class="social-login">
+        <a href="#" class="social-btn">
+          <span>🔷</span>
+          <span>Continue with Discord</span>
+        </a>
+        <a href="#" class="social-btn">
+          <span>📧</span>
+          <span>Continue with Google</span>
+        </a>
+      </div>
+
+      <div class="login-link">
+        Already have an account? <a href="login.html">Login</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const form = document.getElementById('registerForm');
+  const errorEl = document.getElementById('errorMessage');
+  const successEl = document.getElementById('successMessage');
+  const registerBtn = document.getElementById('registerBtn');
+  const btnText = document.getElementById('btnText');
+  
+  function saveSession(user, token){ 
+    try{ 
+      localStorage.setItem('mafiaUser', JSON.stringify(user));
+      localStorage.setItem('mafiaToken', token);
+    }catch(e){ 
+      console.error('Failed to save session:', e);
+    } 
+  }
+
+  function showError(message){
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+    successEl.style.display = 'none';
+    
+    setTimeout(() => {
+      errorEl.style.display = 'none';
+    }, 5000);
+  }
+
+  function showSuccess(message){
+    successEl.textContent = message;
+    successEl.style.display = 'block';
+    errorEl.style.display = 'none';
+  }
+
+  function setLoading(isLoading){
+    if (isLoading) {
+      registerBtn.disabled = true;
+      btnText.textContent = 'Creating account...';
+      registerBtn.style.opacity = '0.7';
+    } else {
+      registerBtn.disabled = false;
+      btnText.textContent = 'Create Account';
+      registerBtn.style.opacity = '1';
+    }
+  }
+
+  function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+
+  form && form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+    
+    const data = {
+      name: (document.getElementById('fname').value||'').trim(),
+      surname: (document.getElementById('lname').value||'').trim(),
+      email: (document.getElementById('email').value||'').trim().toLowerCase(),
+      country: (document.getElementById('country').value||'').trim(),
+      gender: (document.getElementById('gender').value||'').trim(),
+      password: document.getElementById('password').value||'',
+      confirmPassword: document.getElementById('confirmPassword').value||''
+    };
+    
+    if(!data.name || !data.surname || !data.email || !data.country || !data.gender || !data.password || !data.confirmPassword){
+      showError('Please fill in all fields');
+      return;
+    }
+
+    if(!validateEmail(data.email)){
+      showError('Please enter a valid email address');
+      return;
+    }
+
+    if(data.password.length < 6){
+      showError('Password must be at least 6 characters');
+      return;
+    }
+
+    if(data.password !== data.confirmPassword){
+      showError('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    
+    try{
+      const res = await fetch('/api/auth/register', { 
+        method:'POST', 
+        headers:{ 'Content-Type':'application/json' }, 
+        body: JSON.stringify({
+          name: data.name,
+          surname: data.surname,
+          email: data.email,
+          country: data.country,
+          gender: data.gender,
+          password: data.password
+        }) 
+      });
+      
+      const body = await res.json().catch(()=>({}));
+      
+      if(!res.ok) { 
+        showError(body.error || 'Registration failed. Please try again.'); 
+        return; 
+      }
+      
+      saveSession(body.user, 'temp_token');
+      showSuccess('Account created successfully! Redirecting to login...');
+      
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 2000);
+      
+    }catch(e){
+      console.error('Registration error:', e);
+      showError('Unable to connect to server. Please check your internet connection.');
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  document.querySelectorAll('.social-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const provider = btn.textContent.includes('Discord') ? 'Discord' : 'Google';
+      showError(`${provider} registration coming soon!`);
+    });
+  });
+
+  const password = document.getElementById('password');
+  const confirmPassword = document.getElementById('confirmPassword');
+  
+  confirmPassword.addEventListener('input', () => {
+    if (confirmPassword.value && password.value !== confirmPassword.value) {
+      confirmPassword.setCustomValidity('Passwords do not match');
+    } else {
+      confirmPassword.setCustomValidity('');
+    }
+  });
+})();
+</script>
+</body>
+</html>

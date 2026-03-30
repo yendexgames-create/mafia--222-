@@ -309,7 +309,6 @@
   </div>
 
 <script>
-/* filepath: c:\Users\Acer\Desktop\mafia\frontend\login.html */
 (function(){
   const form = document.getElementById('loginForm');
   const errorEl = document.getElementById('errorMessage');
@@ -322,7 +321,6 @@
       localStorage.setItem('mafiaUser', JSON.stringify(user));
       localStorage.setItem('mafiaToken', token);
       
-      // Save remember me preference
       const rememberMe = document.getElementById('remember').checked;
       if (rememberMe) {
         localStorage.setItem('mafiaRemember', 'true');
@@ -339,7 +337,6 @@
     errorEl.style.display = 'block';
     successEl.style.display = 'none';
     
-    // Auto hide after 5 seconds
     setTimeout(() => {
       errorEl.style.display = 'none';
     }, 5000);
@@ -368,7 +365,6 @@
     return re.test(email);
   }
 
-  // Check if user should be remembered
   const rememberMe = localStorage.getItem('mafiaRemember') === 'true';
   if (rememberMe) {
     document.getElementById('remember').checked = true;
@@ -382,7 +378,6 @@
     const email = (document.getElementById('lemail').value||'').trim().toLowerCase();
     const password = document.getElementById('lpass').value||'';
     
-    // Validation
     if(!email || !password){
       showError('Please fill in all fields');
       return;
@@ -429,39 +424,22 @@
     }
   });
 
-  // Check if already logged in
   const token = localStorage.getItem('mafiaToken');
   const user = localStorage.getItem('mafiaUser');
   if(token && user){
     window.location.href = 'index.html';
   }
 
-  // Forgot password handler
   document.querySelector('.forgot-link').addEventListener('click', (e) => {
     e.preventDefault();
     showError('Password reset feature coming soon!');
   });
 
-  // Social login handlers
   document.querySelectorAll('.social-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const provider = btn.textContent.includes('Discord') ? 'Discord' : 'Google';
       showError(`${provider} login coming soon!`);
-    });
-  });
-
-  // Input field animations
-  const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
-  inputs.forEach(input => {
-    input.addEventListener('focus', () => {
-      input.parentElement.classList.add('focused');
-    });
-    
-    input.addEventListener('blur', () => {
-      if (!input.value) {
-        input.parentElement.classList.remove('focused');
-      }
     });
   });
 })();
